@@ -1,11 +1,11 @@
 {
-  "name": "WU Schedule",
+  "name": "WU Schedule — Collegium Da Vinci",
   "short_name": "WU Plan",
-  "description": "Расписание занятий CDV Wyższa Uczelnia",
+  "description": "Minimalistyczna aplikacja planu zajęć CDV",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f0f13",
-  "theme_color": "#0f0f13",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "orientation": "portrait",
   "icons": [
     {
