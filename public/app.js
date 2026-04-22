@@ -36,9 +36,9 @@ const translations = {
       { title: 'Instalacja w dwa kliknięcia.', sub: 'Naciśnij "Udostępnij" w Safari i dodaj do ekranu głównego.' },
       { title: 'Na ekran główny.', sub: 'Korzystaj jak z natywnej aplikacji na swoim iPhonie.' },
     ],
-    dayNames: ['Niedz','Pon','Wt','Śr','Czw','Pt','Sob'],
-    dayNamesFull: ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'],
-    monthNames: ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'],
+    dayNames: ['Niedz', 'Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob'],
+    dayNamesFull: ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
+    monthNames: ['stycznia', 'lutego', 'marca', 'kwietnia', 'maja', 'czerwca', 'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia'],
   },
   ru: {
     loginTitle: 'Виртуальный Университет',
@@ -72,9 +72,9 @@ const translations = {
       { title: 'Установка в два клика.', sub: 'Нажми «Поделиться» в Safari и добавь на главный экран.' },
       { title: 'Пользуйся как приложением.', sub: 'Выбери «На экран Домой» и запускай как нативное.' },
     ],
-    dayNames: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
-    dayNamesFull: ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],
-    monthNames: ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'],
+    dayNames: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    dayNamesFull: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+    monthNames: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'],
   },
   en: {
     loginTitle: 'Virtual University',
@@ -108,9 +108,9 @@ const translations = {
       { title: 'Install in two taps.', sub: 'Tap "Share" in Safari and add to your home screen.' },
       { title: 'Use it like an app.', sub: 'Choose "Add to Home Screen" and launch it like native.' },
     ],
-    dayNames: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
-    dayNamesFull: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
-    monthNames: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+    dayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    dayNamesFull: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
   }
 };
 
@@ -152,7 +152,7 @@ const els = {
 function monday(offset = 0) {
   const d = new Date();
   const day = d.getDay() || 7;
-  d.setHours(0,0,0,0);
+  d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() - day + 1 + offset * 7);
   return d;
 }
@@ -232,7 +232,7 @@ function finishOnboarding() {
   localStorage.setItem('onboarding_done', '1');
   const scr = document.getElementById('onboarding-screen');
   scr.style.opacity = '0';
-  setTimeout(() => { scr.classList.add('hidden'); scr.style.opacity = ''; bootApp(); }, 500);
+  setTimeout(() => { scr.classList.add('hidden'); scr.style.display = 'none'; scr.style.opacity = ''; bootApp(); }, 500);
 }
 
 document.getElementById('ob-btn-next').addEventListener('click', () => { haptic(); if (obCurrent < OB_TOTAL - 1) renderObSlide(obCurrent + 1); });
@@ -241,7 +241,7 @@ document.getElementById('ob-btn-start').addEventListener('click', () => { haptic
 
 // ── PERSISTENT LOGIN ───────────────────────────────────
 function saveCredentials(login, pass) {
-  try { localStorage.setItem('wu_creds', btoa(unescape(encodeURIComponent(JSON.stringify({ login, pass }))))); } catch (_) {}
+  try { localStorage.setItem('wu_creds', btoa(unescape(encodeURIComponent(JSON.stringify({ login, pass }))))); } catch (_) { }
 }
 function loadCredentials() {
   try { const r = localStorage.getItem('wu_creds'); return r ? JSON.parse(decodeURIComponent(escape(atob(r)))) : null; } catch (_) { return null; }
@@ -250,7 +250,7 @@ function clearCredentials() { localStorage.removeItem('wu_creds'); }
 
 // ── AUTO-LOGIN ─────────────────────────────────────────
 async function autoLogin(creds) {
-  state.selectedDay = new Date(); state.selectedDay.setHours(0,0,0,0);
+  state.selectedDay = new Date(); state.selectedDay.setHours(0, 0, 0, 0);
   state.weekOffset = 0;
   showScreen('app'); startProgressTimer(); checkIosBanner();
   renderWeekUI();
@@ -261,7 +261,7 @@ async function autoLogin(creds) {
       const p = JSON.parse(cached);
       state.classes = (p.data.return || []).sort((a, b) => a.start.localeCompare(b.start));
       renderDay(state.selectedDay);
-      const ts = new Date(p.ts).toLocaleString(t('cacheKey'), { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      const ts = new Date(p.ts).toLocaleString(t('cacheKey'), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
       if (els.offlineBanner && els.offlineText) { els.offlineText.textContent = t('offlineMode') + ' ' + ts; els.offlineBanner.style.display = 'flex'; initIcons(); }
     } catch (_) { renderSkeleton(); }
   } else { renderSkeleton(); }
@@ -283,17 +283,17 @@ async function backgroundRefresh() {
       renderDay(state.selectedDay);
       if (els.offlineBanner) els.offlineBanner.style.display = 'none';
     }
-  } catch (_) {}
+  } catch (_) { }
 }
 
 function renderWeekUI() {
   const mon = monday(state.weekOffset), sun = addDays(mon, 6);
   const locale = state.lang === 'ru' ? 'ru' : state.lang === 'en' ? 'en' : 'pl';
-  els.weekLabel.textContent = mon.toLocaleDateString(locale, { day:'numeric', month:'short' }) + ' – ' + sun.toLocaleDateString(locale, { day:'numeric', month:'short' });
+  els.weekLabel.textContent = mon.toLocaleDateString(locale, { day: 'numeric', month: 'short' }) + ' – ' + sun.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
   els.todayIndicator.style.display = isCurrentWeek() ? 'block' : 'none';
   updateDayHeading(state.selectedDay);
   els.dayTabs.innerHTML = '';
-  const today = new Date(); today.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
   for (let i = 0; i < 6; i++) {
     const d = addDays(mon, i);
     const tab = document.createElement('button');
@@ -415,7 +415,7 @@ $('ios-close').addEventListener('click', () => {
 
 // ── SERVICE WORKER ─────────────────────────────────────
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.register('/sw.js').catch(() => { });
 }
 
 // ── LOGIN ──────────────────────────────────────────────
@@ -466,7 +466,7 @@ function enterApp() {
   showScreen('app');
   state.weekOffset = 0;
   state.selectedDay = new Date();
-  state.selectedDay.setHours(0,0,0,0);
+  state.selectedDay.setHours(0, 0, 0, 0);
   renderWeek();
   checkIosBanner();
   startProgressTimer();
@@ -513,7 +513,7 @@ async function renderWeek() {
 
   // Day tabs
   els.dayTabs.innerHTML = '';
-  const today = new Date(); today.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
 
   for (let i = 0; i < 6; i++) {
     const d = addDays(mon, i);
@@ -619,7 +619,7 @@ function selectDay(d) {
 // ── RENDER DAY ─────────────────────────────────────────
 function renderDay(date) {
   const classes = state.classes.filter(c => {
-    const d = new Date(c.start); d.setHours(0,0,0,0);
+    const d = new Date(c.start); d.setHours(0, 0, 0, 0);
     return isSameDay(d, date);
   });
 
@@ -726,7 +726,7 @@ async function openDetail(cls) {
 
   // Skeleton in sheet
   els.sheetBody.innerHTML = `<div class="sheet-skeleton">
-    ${[1,2,3,4].map(() => `<div class="detail-row">
+    ${[1, 2, 3, 4].map(() => `<div class="detail-row">
       <div class="detail-icon"><div class="skeleton-bone" style="width:18px;height:18px;border-radius:4px"></div></div>
       <div class="detail-info">
         <div class="skeleton-bone" style="width:60px;height:10px;margin-bottom:6px"></div>

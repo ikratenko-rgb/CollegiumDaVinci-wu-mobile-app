@@ -4,13 +4,35 @@
 
 /* ── SHAKE ANIMATION (iOS-style login error) ─────────── */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  15%       { transform: translateX(-8px); }
-  30%       { transform: translateX(7px); }
-  45%       { transform: translateX(-6px); }
-  60%       { transform: translateX(5px); }
-  75%       { transform: translateX(-3px); }
-  90%       { transform: translateX(2px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  15% {
+    transform: translateX(-8px);
+  }
+
+  30% {
+    transform: translateX(7px);
+  }
+
+  45% {
+    transform: translateX(-6px);
+  }
+
+  60% {
+    transform: translateX(5px);
+  }
+
+  75% {
+    transform: translateX(-3px);
+  }
+
+  90% {
+    transform: translateX(2px);
+  }
 }
 
 .shake {
@@ -48,7 +70,7 @@
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(0,0,0,0.2);
+  border: 2px solid rgba(0, 0, 0, 0.2);
   border-top-color: var(--bg);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
@@ -57,7 +79,7 @@
 }
 
 [data-theme="light"] .btn-primary .btn-spinner {
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: #fff;
 }
 
@@ -85,7 +107,9 @@
 }
 
 /* ── RESET ──────────────────────────────────────────── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -137,7 +161,8 @@
 }
 
 /* ── BASE ───────────────────────────────────────────── */
-html, body {
+html,
+body {
   height: 100%;
   background: var(--bg);
   color: var(--text);
@@ -560,7 +585,7 @@ html, body {
   overflow: hidden;
 }
 
-.class-card.current + .class-card {
+.class-card.current+.class-card {
   border-top: none;
 }
 
@@ -718,12 +743,10 @@ html, body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--skeleton-shine) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--skeleton-shine) 50%,
+      transparent 100%);
   animation: shimmer 1.5s ease-in-out infinite;
   transform: translateX(-100%);
 }
@@ -1042,13 +1065,22 @@ html, body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Fade-in animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-in {
@@ -1093,7 +1125,7 @@ html, body {
 
 .ob-slide.active {
   opacity: 1;
-  pointer-events: all;
+  pointer-events: inherit;
 }
 
 /* SVG area */
@@ -1113,26 +1145,66 @@ html, body {
 
 /* Pulse — slide 1 */
 @keyframes ob-pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.07); opacity: 0.8; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.07);
+    opacity: 0.8;
+  }
 }
-.ob-pulse { animation: ob-pulse 2.5s ease-in-out infinite; transform-origin: center; }
+
+.ob-pulse {
+  animation: ob-pulse 2.5s ease-in-out infinite;
+  transform-origin: center;
+}
 
 /* Float — slide 2 */
 @keyframes ob-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
-.ob-float { animation: ob-float 2.2s ease-in-out infinite; }
+
+.ob-float {
+  animation: ob-float 2.2s ease-in-out infinite;
+}
 
 /* Drop-in — slide 3 app icon */
 @keyframes ob-drop {
-  0% { transform: translateY(-28px); opacity: 0; }
-  65% { transform: translateY(4px); opacity: 1; }
-  82% { transform: translateY(-2px); }
-  100% { transform: translateY(0); opacity: 1; }
+  0% {
+    transform: translateY(-28px);
+    opacity: 0;
+  }
+
+  65% {
+    transform: translateY(4px);
+    opacity: 1;
+  }
+
+  82% {
+    transform: translateY(-2px);
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
-.ob-drop { animation: ob-drop 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both; }
+
+.ob-drop {
+  animation: ob-drop 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
 
 /* Text */
 .ob-title {
@@ -1147,7 +1219,7 @@ html, body {
 
 .ob-subtitle {
   font-size: 15px;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
   text-align: center;
   line-height: 1.5;
   max-width: 280px;
@@ -1177,7 +1249,7 @@ html, body {
   width: 5px;
   height: 5px;
   border-radius: 3px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   transition: width 0.3s ease, background 0.3s ease;
 }
 
@@ -1197,7 +1269,7 @@ html, body {
 .ob-btn-skip {
   background: none;
   border: none;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255, 255, 255, 0.3);
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -1220,7 +1292,8 @@ html, body {
   transition: opacity 0.15s ease, transform 0.1s ease;
 }
 
-.ob-btn-next:active, .ob-btn-start:active {
+.ob-btn-next:active,
+.ob-btn-start:active {
   opacity: 0.8;
   transform: scale(0.97);
 }
@@ -1245,4 +1318,3 @@ html, body {
 .ob-btn-start.visible {
   display: block;
 }
-
