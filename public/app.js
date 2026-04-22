@@ -33,7 +33,7 @@ const translations = {
     feedbackText: 'Znalazłeś błąd? Napisz do mnie',
     obSkip: 'Pomiń', obNext: 'Dalej', obStart: 'Zaczynamy!',
     ob: [
-      { title: 'Twój plan.', sub: 'Zawsze pod ręką, bez opóźnień i laguów.' },
+      { title: 'Twój plan.', sub: 'Zawsze pod ręką, bez opóźnień i lagów.' },
       { title: 'Instalacja w dwa kliknięcia.', sub: 'Naciśnij "Udostępnij" w Safari i dodaj do ekranu głównego.' },
       { title: 'Na ekran główny.', sub: 'Korzystaj jak z natywnej aplikacji na swoim iPhonie.' },
     ],
