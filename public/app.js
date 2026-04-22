@@ -30,6 +30,7 @@ const translations = {
     offlineMode: 'Tryb offline · dane z',
     cacheKey: 'pl-PL',
     sessionExpired: 'Sesja wygasła. Zaloguj się ponownie.',
+    feedbackText: 'Znalazłeś błąd? Napisz do mnie',
     obSkip: 'Pomiń', obNext: 'Dalej', obStart: 'Zaczynamy!',
     ob: [
       { title: 'Twój plan.', sub: 'Zawsze pod ręką, bez opóźnień i laguów.' },
@@ -66,6 +67,7 @@ const translations = {
     offlineMode: 'Офлайн · данные от',
     cacheKey: 'ru-RU',
     sessionExpired: 'Сессия истекла. Войдите снова.',
+    feedbackText: 'Нашел баг? Напиши мне',
     obSkip: 'Пропустить', obNext: 'Далее', obStart: 'Начнём!',
     ob: [
       { title: 'Твоё расписание.', sub: 'Всегда под рукой, без лагов и пауз.' },
@@ -102,6 +104,7 @@ const translations = {
     offlineMode: 'Offline · data from',
     cacheKey: 'en-US',
     sessionExpired: 'Session expired. Please log in again.',
+    feedbackText: 'Found a bug? Let me know',
     obSkip: 'Skip', obNext: 'Next', obStart: "Let's go!",
     ob: [
       { title: 'Your schedule.', sub: 'Always at hand, fast and smooth.' },
@@ -628,6 +631,9 @@ function renderDay(date) {
       <div class="empty-state-icon"><i data-lucide="coffee" stroke-width="1"></i></div>
       <div class="empty-state-title">${t('emptyTitle')}</div>
       <div class="empty-state-subtitle">${t('emptySubtitle')}</div>
+      <a class="feedback-link" href="https://t.me/krtlnk" target="_blank" rel="noopener">
+        <i data-lucide="send" stroke-width="1.2"></i>${t('feedbackText')}
+      </a>
     </div>`;
     initIcons();
     return;
@@ -683,6 +689,16 @@ function renderDay(date) {
 
     if (isCurrent) currentCard = card;
   });
+
+  // Feedback footer
+  const fb = document.createElement('a');
+  fb.className = 'feedback-link animate-in';
+  fb.href = 'https://t.me/krtlnk';
+  fb.target = '_blank';
+  fb.rel = 'noopener';
+  fb.style.animationDelay = `${classes.length * 0.04 + 0.1}s`;
+  fb.innerHTML = `<i data-lucide="send" stroke-width="1.2"></i>${t('feedbackText')}`;
+  els.scheduleList.appendChild(fb);
 
   initIcons();
 
