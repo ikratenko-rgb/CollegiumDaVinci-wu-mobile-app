@@ -1,8 +1,3 @@
-// ═══════════════════════════════════════════════════════
-// WU PLAN · Elite PWA — app.js
-// ═══════════════════════════════════════════════════════
-
-// ── i18n ───────────────────────────────────────────────
 const translations = {
   pl: {
     loginTitle: 'Wirtualna Uczelnia',
@@ -117,7 +112,6 @@ const translations = {
   }
 };
 
-// ── STATE ──────────────────────────────────────────────
 const state = {
   session: null,
   weekOffset: 0,
@@ -129,11 +123,9 @@ const state = {
 
 function t(key) { return (translations[state.lang] || translations.pl)[key] || key; }
 
-// ── STORAGE ────────────────────────────────────────────
 const saveSession = () => localStorage.setItem('wu_session', state.session || '');
 const loadSession = () => { state.session = localStorage.getItem('wu_session') || null; };
 
-// ── DOM ────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const els = {
   loginScreen: $('login-screen'), appScreen: $('app-screen'),
@@ -151,7 +143,6 @@ const els = {
   toast: $('toast'),
 };
 
-// ── HELPERS ────────────────────────────────────────────
 function monday(offset = 0) {
   const d = new Date();
   const day = d.getDay() || 7;
@@ -171,7 +162,6 @@ function haptic() {
   if (navigator.vibrate) navigator.vibrate(10);
 }
 
-// ── TOAST ──────────────────────────────────────────────
 let toastTimer = null;
 function showToast(msg) {
   if (!els.toast) return;
@@ -181,11 +171,9 @@ function showToast(msg) {
   toastTimer = setTimeout(() => els.toast.classList.remove('show'), 3000);
 }
 
-// ── SHAKE ──────────────────────────────────────────────
 function shakeForm() {
   const form = els.loginScreen;
   form.classList.remove('shake');
-  // Force reflow to restart animation
   void form.offsetWidth;
   form.classList.add('shake');
   form.addEventListener('animationend', () => form.classList.remove('shake'), { once: true });
@@ -200,7 +188,6 @@ function initIcons() {
   if (window.lucide) lucide.createIcons();
 }
 
-// ── ONBOARDING ─────────────────────────────────────────
 let obCurrent = 0;
 const OB_TOTAL = 3;
 
@@ -242,7 +229,6 @@ document.getElementById('ob-btn-next').addEventListener('click', () => { haptic(
 document.getElementById('ob-btn-skip').addEventListener('click', () => { haptic(); finishOnboarding(); });
 document.getElementById('ob-btn-start').addEventListener('click', () => { haptic(); finishOnboarding(); });
 
-// ── PERSISTENT LOGIN ───────────────────────────────────
 function saveCredentials(login, pass) {
   try { localStorage.setItem('wu_creds', btoa(unescape(encodeURIComponent(JSON.stringify({ login, pass }))))); } catch (_) { }
 }
@@ -251,7 +237,6 @@ function loadCredentials() {
 }
 function clearCredentials() { localStorage.removeItem('wu_creds'); }
 
-// ── AUTO-LOGIN ─────────────────────────────────────────
 async function autoLogin(creds) {
   state.selectedDay = new Date(); state.selectedDay.setHours(0, 0, 0, 0);
   state.weekOffset = 0;
@@ -311,12 +296,16 @@ function renderWeekUI() {
 
 function bootApp() {
   const creds = loadCredentials();
-  if (creds) { autoLogin(creds); }
-  else if (state.session) { enterApp(); }
-  else { showScreen('login'); }
+  if (creds && creds.login && creds.pass) {
+    autoLogin(creds);
+  } else {
+    clearCredentials();
+    state.session = null;
+    saveSession();
+    showScreen('login');
+  }
 }
 
-// ── THEME ──────────────────────────────────────────────
 function applyTheme(theme) {
   state.theme = theme;
   localStorage.setItem('wu_theme', theme);
@@ -335,7 +324,6 @@ els.btnTheme.addEventListener('click', () => {
   applyTheme(state.theme === 'dark' ? 'light' : 'dark');
 });
 
-// ── i18n APPLY ─────────────────────────────────────────
 function applyLang(lang) {
   state.lang = lang;
   localStorage.setItem('wu_lang', lang);
@@ -350,7 +338,6 @@ function applyLang(lang) {
   });
 }
 
-// Language dropdown
 els.btnLang.addEventListener('click', (e) => {
   e.stopPropagation();
   haptic();
@@ -368,7 +355,6 @@ document.querySelectorAll('.lang-option').forEach(btn => {
 
 document.addEventListener('click', () => els.langDropdown.classList.remove('open'));
 
-// ── API ────────────────────────────────────────────────
 async function apiLogin(login, password) {
   const r = await fetch('/api/login', {
     method: 'POST',
@@ -402,7 +388,6 @@ async function apiDetails(cls) {
   return r.json();
 }
 
-// ── iOS BANNER ─────────────────────────────────────────
 function checkIosBanner() {
   const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isStandalone = window.navigator.standalone;
@@ -416,12 +401,10 @@ $('ios-close').addEventListener('click', () => {
   localStorage.setItem('wu_ios_dismissed', '1');
 });
 
-// ── SERVICE WORKER ─────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => { });
 }
 
-// ── LOGIN ──────────────────────────────────────────────
 els.btnLogin.addEventListener('click', async () => {
   const login = els.inpLogin.value.trim();
   const pass = els.inpPass.value;
@@ -431,20 +414,20 @@ els.btnLogin.addEventListener('click', async () => {
     return;
   }
 
-  // Button loader
   els.btnLogin.disabled = true;
   els.btnLogin.innerHTML = `<span class="btn-spinner"></span>${t('loginConnecting')}`;
   els.loginError.textContent = '';
 
   const data = await apiLogin(login, pass).catch(() => ({ error: t('networkError') }));
+  const loginOk = data && typeof data.session === 'string' && data.session.length > 0;
 
-  if (data.session) {
+  if (loginOk) {
     state.session = data.session;
     saveSession();
-    saveCredentials(els.inpLogin.value.trim(), els.inpPass.value);
+    saveCredentials(login, pass);
     enterApp();
   } else {
-    const msg = data.error || t('loginFail');
+    const msg = (data && data.error) ? data.error : t('loginFail');
     els.loginError.textContent = msg;
     shakeForm();
     showToast(msg);
@@ -464,7 +447,6 @@ $('btn-logout').addEventListener('click', () => {
   showScreen('login');
 });
 
-// ── APP INIT ───────────────────────────────────────────
 function enterApp() {
   showScreen('app');
   state.weekOffset = 0;
@@ -475,7 +457,6 @@ function enterApp() {
   startProgressTimer();
 }
 
-// ── SKELETON ───────────────────────────────────────────
 function renderSkeleton() {
   let html = '';
   for (let i = 0; i < 4; i++) {
@@ -496,7 +477,6 @@ function renderSkeleton() {
   els.scheduleList.innerHTML = html;
 }
 
-// ── WEEK NAV ───────────────────────────────────────────
 $('btn-prev').addEventListener('click', () => { haptic(); state.weekOffset--; renderWeek(); });
 $('btn-next').addEventListener('click', () => { haptic(); state.weekOffset++; renderWeek(); });
 
@@ -506,15 +486,11 @@ async function renderWeek() {
   const locale = state.lang === 'ru' ? 'ru' : state.lang === 'en' ? 'en' : 'pl';
   const cacheKey = `wu_schedule_${fmt(mon)}`;
 
-  // Week label
   const opts = { day: 'numeric', month: 'short' };
   els.weekLabel.textContent = `${mon.toLocaleDateString(locale, opts)} – ${sun.toLocaleDateString(locale, opts)}`;
   els.todayIndicator.style.display = isCurrentWeek() ? 'block' : 'none';
-
-  // Day heading
   updateDayHeading(state.selectedDay);
 
-  // Day tabs
   els.dayTabs.innerHTML = '';
   const today = new Date(); today.setHours(0, 0, 0, 0);
 
@@ -529,35 +505,25 @@ async function renderWeek() {
     els.dayTabs.appendChild(tab);
   }
 
-  // Skeleton loading
   renderSkeleton();
-
-  // Hide offline banner by default
   if (els.offlineBanner) els.offlineBanner.style.display = 'none';
 
-  // Try fetching from network
   let data = null;
   let fromCache = false;
 
   try {
     data = await apiSchedule(fmt(mon), fmt(sun));
     if (data && data.error_code === 0) {
-      // Save to cache with timestamp
-      localStorage.setItem(cacheKey, JSON.stringify({
-        ts: Date.now(),
-        data,
-      }));
+      localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data }));
     }
   } catch (_) {
-    // Network failed — try cache
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
         data = parsed.data;
         fromCache = true;
-        const cacheDate = new Date(parsed.ts);
-        const timeStr = cacheDate.toLocaleString(t('cacheKey'), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const timeStr = new Date(parsed.ts).toLocaleString(t('cacheKey'), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
         if (els.offlineBanner) {
           els.offlineText.textContent = `${t('offlineMode')} ${timeStr}`;
           els.offlineBanner.style.display = 'flex';
@@ -571,15 +537,13 @@ async function renderWeek() {
     if (data && data.error === 'Session expired') {
       state.session = null; saveSession(); showScreen('login'); return;
     }
-    // Last-ditch cache attempt if no network error was caught but data is bad
-    const cached = !fromCache && localStorage.getItem(cacheKey);
-    if (cached) {
+    const fallback = !fromCache && localStorage.getItem(cacheKey);
+    if (fallback) {
       try {
-        const parsed = JSON.parse(cached);
+        const parsed = JSON.parse(fallback);
         data = parsed.data;
         fromCache = true;
-        const cacheDate = new Date(parsed.ts);
-        const timeStr = cacheDate.toLocaleString(t('cacheKey'), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const timeStr = new Date(parsed.ts).toLocaleString(t('cacheKey'), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
         if (els.offlineBanner) {
           els.offlineText.textContent = `${t('offlineMode')} ${timeStr}`;
           els.offlineBanner.style.display = 'flex';
@@ -619,7 +583,23 @@ function selectDay(d) {
   renderDay(d);
 }
 
-// ── RENDER DAY ─────────────────────────────────────────
+const CLASS_TYPE_COLORS = {
+  'Wykład': '#9b5de5',
+  'Lektorat': '#9b5de5',
+  'Laboratorium': '#00b4d8',
+  'Ćwiczenia': '#f77f00',
+  'Seminarium': '#f77f00',
+  'Projekt': '#f77f00',
+};
+
+function classTypeColor(form) {
+  if (!form) return '#555555';
+  for (const [key, color] of Object.entries(CLASS_TYPE_COLORS)) {
+    if (form.toLowerCase().includes(key.toLowerCase())) return color;
+  }
+  return '#555555';
+}
+
 function renderDay(date) {
   const classes = state.classes.filter(c => {
     const d = new Date(c.start); d.setHours(0, 0, 0, 0);
@@ -668,6 +648,8 @@ function renderDay(date) {
       progressHtml = `<div class="progress-bar" data-start="${cls.start}" data-end="${cls.end}" style="width:${pct.toFixed(1)}%"></div>`;
     }
 
+    const dotColor = classTypeColor(cls.form);
+
     card.innerHTML = `
       <div class="time-col">
         <span class="time-start">${timeS}</span>
@@ -676,6 +658,7 @@ function renderDay(date) {
       <div class="class-content">
         <div class="class-title">${cls.title}</div>
         <div class="class-meta">
+          <span class="type-dot" style="background:${dotColor}"></span>
           <span class="meta-item">${cls.form}</span>
           <span class="meta-dot"></span>
           <span class="meta-item"><i data-lucide="map-pin" stroke-width="1.2"></i>${cls.room}</span>
@@ -690,7 +673,6 @@ function renderDay(date) {
     if (isCurrent) currentCard = card;
   });
 
-  // Feedback footer
   const fb = document.createElement('a');
   fb.className = 'feedback-link animate-in';
   fb.href = 'https://t.me/krtlnk';
@@ -702,15 +684,11 @@ function renderDay(date) {
 
   initIcons();
 
-  // Auto-scroll to current or nearest upcoming
   requestAnimationFrame(() => {
-    if (currentCard) {
-      currentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    if (currentCard) currentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 }
 
-// ── PROGRESS TIMER ─────────────────────────────────────
 let progressInterval = null;
 
 function startProgressTimer() {
@@ -734,13 +712,11 @@ function updateProgress() {
   });
 }
 
-// ── BOTTOM SHEET ───────────────────────────────────────
 async function openDetail(cls) {
   haptic();
   els.sheetTitle.textContent = cls.title;
   els.sheetSubtitle.textContent = cls.form;
 
-  // Skeleton in sheet
   els.sheetBody.innerHTML = `<div class="sheet-skeleton">
     ${[1, 2, 3, 4].map(() => `<div class="detail-row">
       <div class="detail-icon"><div class="skeleton-bone" style="width:18px;height:18px;border-radius:4px"></div></div>
@@ -808,7 +784,6 @@ function closeSheet() {
 
 els.sheetBackdrop.addEventListener('click', closeSheet);
 
-// Drag-to-dismiss
 let sheetDragY = null;
 els.sheetHandle.addEventListener('touchstart', e => {
   sheetDragY = e.touches[0].clientY;
@@ -836,7 +811,6 @@ document.addEventListener('touchend', () => {
   sheetDragY = null;
 });
 
-// ── BOOT ───────────────────────────────────────────────
 loadSession();
 applyTheme(state.theme);
 applyLang(state.lang);

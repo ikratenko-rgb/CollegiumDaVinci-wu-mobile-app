@@ -669,6 +669,14 @@ body {
   flex-shrink: 0;
 }
 
+.type-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
 /* Chevron */
 .card-chevron {
   flex-shrink: 0;
