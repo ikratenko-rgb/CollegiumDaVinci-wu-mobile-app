@@ -2,12 +2,23 @@ const express = require('express');
 const axios = require('axios');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const { rateLimit } = require('express-rate-limit');
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, slow down.' },
+});
+
+app.use('/api/', apiLimiter);
 
 const BASE_URL = 'https://wu.cdv.pl';
 
@@ -17,7 +28,6 @@ const commonHeaders = {
   'Referer': `${BASE_URL}/?page=Schedule&view=student`,
 };
 
-// Login
 app.post('/api/login', async (req, res) => {
   const { login, password } = req.body;
   if (!login || !password) return res.status(400).json({ error: 'login and password required' });
@@ -60,7 +70,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Get schedule for a week
 app.post('/api/schedule', async (req, res) => {
   const { session, start, end } = req.body;
   if (!session) return res.status(401).json({ error: 'No session' });
@@ -91,7 +100,6 @@ app.post('/api/schedule', async (req, res) => {
   }
 });
 
-// Get class details
 app.post('/api/class-details', async (req, res) => {
   const { session, room_id, teacher_id, term_id, group_id } = req.body;
   if (!session) return res.status(401).json({ error: 'No session' });
@@ -118,7 +126,6 @@ app.post('/api/class-details', async (req, res) => {
   }
 });
 
-// Serve PWA for all other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

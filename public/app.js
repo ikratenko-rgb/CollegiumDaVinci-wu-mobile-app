@@ -348,13 +348,18 @@ function renderWeekUI() {
 
 function bootApp() {
   const creds = loadCredentials();
-  if (creds && creds.login && creds.pass) {
+  const storedSession = localStorage.getItem('wu_session');
+  els.loginScreen.classList.add('hidden');
+  if (storedSession && creds && creds.login && creds.pass) {
+    state.session = storedSession;
+    autoLogin(creds);
+  } else if (creds && creds.login && creds.pass) {
     autoLogin(creds);
   } else {
     clearCredentials();
     state.session = null;
     saveSession();
-    showScreen('login');
+    els.loginScreen.classList.remove('hidden');
   }
 }
 
@@ -452,7 +457,15 @@ $('ios-close').addEventListener('click', () => {
 });
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => { });
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const next = reg.installing;
+      if (!next) return;
+      next.addEventListener('statechange', () => {
+        if (next.state === 'activated') window.location.reload();
+      });
+    });
+  }).catch(() => {});
 }
 
 els.btnLogin.addEventListener('click', async () => {
@@ -532,6 +545,16 @@ function renderSkeleton() {
 
 $('btn-prev').addEventListener('click', () => { haptic(); state.weekOffset--; renderWeek(); });
 $('btn-next').addEventListener('click', () => { haptic(); state.weekOffset++; renderWeek(); });
+
+function goToday() {
+  haptic();
+  const { day, offset } = computeDefaultDay();
+  state.weekOffset = offset;
+  state.selectedDay = day;
+  renderWeek();
+}
+
+$('btn-today') && $('btn-today').addEventListener('click', goToday);
 
 async function renderWeek() {
   const mon = monday(state.weekOffset);
@@ -856,6 +879,12 @@ if (!localStorage.getItem('onboarding_done')) {
 } else {
   bootApp();
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && state.session) {
+    backgroundRefresh();
+  }
+});
 
 function requestNotifyPermission() {
   if (!('Notification' in window) || Notification.permission !== 'default') return;
