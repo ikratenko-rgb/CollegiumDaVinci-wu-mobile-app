@@ -1,8 +1,10 @@
+const savedSession = localStorage.getItem('wu_session');
+if (savedSession) document.getElementById('login-screen').classList.add('hidden');
+
+const savedLang = localStorage.getItem('wu_lang');
+
 const NOTIFY_BEFORE_MS = 15 * 60 * 1000;
 let notifyTimers = [];
-
-const _storedSession = localStorage.getItem('wu_session') || null;
-const _storedLang = localStorage.getItem('wu_lang') || null;
 
 const translations = {
   pl: {
@@ -122,13 +124,13 @@ const translations = {
 };
 
 function detectLang() {
-  if (_storedLang && translations[_storedLang]) return _storedLang;
+  if (savedLang && translations[savedLang]) return savedLang;
   const nav = (navigator.language || '').slice(0, 2).toLowerCase();
   return translations[nav] ? nav : 'ru';
 }
 
 const state = {
-  session: _storedSession,
+  session: savedSession || null,
   weekOffset: 0,
   selectedDay: null,
   classes: [],
@@ -140,7 +142,6 @@ const state = {
 function t(key) { return (translations[state.lang] || translations.pl)[key] || key; }
 
 const saveSession = () => localStorage.setItem('wu_session', state.session || '');
-const loadSession = () => { state.session = localStorage.getItem('wu_session') || null; };
 
 const $ = id => document.getElementById(id);
 const els = {
@@ -357,10 +358,7 @@ function renderWeekUI() {
 
 function bootApp() {
   const creds = loadCredentials();
-  els.loginScreen.classList.add('hidden');
-  if (state.session && creds && creds.login && creds.pass) {
-    autoLogin(creds);
-  } else if (creds && creds.login && creds.pass) {
+  if (creds && creds.login && creds.pass) {
     autoLogin(creds);
   } else {
     clearCredentials();
