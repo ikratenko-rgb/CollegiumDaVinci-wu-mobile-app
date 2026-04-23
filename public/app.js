@@ -1,3 +1,6 @@
+const NOTIFY_BEFORE_MS = 15 * 60 * 1000;
+let notifyTimers = [];
+
 const translations = {
   pl: {
     loginTitle: 'Wirtualna Uczelnia',
@@ -25,6 +28,7 @@ const translations = {
     offlineMode: 'Tryb offline · dane z',
     cacheKey: 'pl-PL',
     sessionExpired: 'Sesja wygasła. Zaloguj się ponownie.',
+    emailInvalid: 'Nieprawidłowy format email',
     feedbackText: 'Znalazłeś błąd? Napisz do mnie',
     obSkip: 'Pomiń', obNext: 'Dalej', obStart: 'Zaczynamy!',
     ob: [
@@ -62,6 +66,7 @@ const translations = {
     offlineMode: 'Офлайн · данные от',
     cacheKey: 'ru-RU',
     sessionExpired: 'Сессия истекла. Войдите снова.',
+    emailInvalid: 'Некорректный email',
     feedbackText: 'Нашел баг? Напиши мне',
     obSkip: 'Пропустить', obNext: 'Далее', obStart: 'Начнём!',
     ob: [
@@ -99,6 +104,7 @@ const translations = {
     offlineMode: 'Offline · data from',
     cacheKey: 'en-US',
     sessionExpired: 'Session expired. Please log in again.',
+    emailInvalid: 'Invalid email format',
     feedbackText: 'Found a bug? Let me know',
     obSkip: 'Skip', obNext: 'Next', obStart: "Let's go!",
     ob: [
@@ -112,13 +118,21 @@ const translations = {
   }
 };
 
+function detectLang() {
+  const saved = localStorage.getItem('wu_lang');
+  if (saved && translations[saved]) return saved;
+  const nav = (navigator.language || '').slice(0, 2).toLowerCase();
+  return translations[nav] ? nav : 'ru';
+}
+
 const state = {
   session: null,
   weekOffset: 0,
   selectedDay: null,
   classes: [],
-  lang: localStorage.getItem('wu_lang') || 'pl',
-  theme: localStorage.getItem('wu_theme') || 'dark',
+  lang: detectLang(),
+  theme: localStorage.getItem('wu_theme') ||
+    (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'),
 };
 
 function t(key) { return (translations[state.lang] || translations.pl)[key] || key; }
@@ -157,6 +171,20 @@ function isSameDay(a, b) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 function isCurrentWeek() { return state.weekOffset === 0; }
+
+function computeDefaultDay() {
+  const now = new Date();
+  const day = now.getDay();
+  const hour = now.getHours();
+  if (day === 0 || (day === 6 && hour >= 15)) return { day: monday(1), offset: 1 };
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return { day: today, offset: 0 };
+}
+
+function getCachedWeek(cacheKey) {
+  try { const r = localStorage.getItem(cacheKey); return r ? JSON.parse(r) : null; } catch (_) { return null; }
+}
 
 function haptic() {
   if (navigator.vibrate) navigator.vibrate(10);
@@ -238,26 +266,50 @@ function loadCredentials() {
 function clearCredentials() { localStorage.removeItem('wu_creds'); }
 
 async function autoLogin(creds) {
-  state.selectedDay = new Date(); state.selectedDay.setHours(0, 0, 0, 0);
-  state.weekOffset = 0;
-  showScreen('app'); startProgressTimer(); checkIosBanner();
-  renderWeekUI();
-  const cacheKey = 'wu_schedule_' + fmt(monday(0));
-  const cached = localStorage.getItem(cacheKey);
-  if (cached) {
-    try {
-      const p = JSON.parse(cached);
-      state.classes = (p.data.return || []).sort((a, b) => a.start.localeCompare(b.start));
-      renderDay(state.selectedDay);
-      const ts = new Date(p.ts).toLocaleString(t('cacheKey'), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-      if (els.offlineBanner && els.offlineText) { els.offlineText.textContent = t('offlineMode') + ' ' + ts; els.offlineBanner.style.display = 'flex'; initIcons(); }
-    } catch (_) { renderSkeleton(); }
-  } else { renderSkeleton(); }
+  let data;
   try {
-    const data = await apiLogin(creds.login, creds.pass);
-    if (data.session) { state.session = data.session; saveSession(); await backgroundRefresh(); }
-    else { clearCredentials(); state.session = null; saveSession(); showToast(t('sessionExpired')); setTimeout(() => showScreen('login'), 1800); }
-  } catch (_) { showToast(t('networkError')); }
+    data = await apiLogin(creds.login, creds.pass);
+  } catch (_) {
+    const { day, offset } = computeDefaultDay();
+    const cached = getCachedWeek('wu_schedule_' + fmt(monday(offset)));
+    if (cached) {
+      state.selectedDay = day;
+      state.weekOffset = offset;
+      showScreen('app');
+      startProgressTimer();
+      checkIosBanner();
+      state.classes = (cached.data.return || []).sort((a, b) => a.start.localeCompare(b.start));
+      renderWeekUI();
+      renderDay(state.selectedDay);
+      const ts = new Date(cached.ts).toLocaleString(t('cacheKey'), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      if (els.offlineBanner) { els.offlineText.textContent = t('offlineMode') + ' ' + ts; els.offlineBanner.style.display = 'flex'; initIcons(); }
+    } else {
+      clearCredentials();
+      showScreen('login');
+    }
+    return;
+  }
+  if (data && data.error) {
+    clearCredentials();
+    showScreen('login');
+    return;
+  }
+  if (data && typeof data.session === 'string' && data.session.length > 0) {
+    state.session = data.session;
+    saveSession();
+    const { day, offset } = computeDefaultDay();
+    state.selectedDay = day;
+    state.weekOffset = offset;
+    showScreen('app');
+    startProgressTimer();
+    checkIosBanner();
+    renderWeek();
+  } else {
+    clearCredentials();
+    state.session = null;
+    saveSession();
+    showScreen('login');
+  }
 }
 
 async function backgroundRefresh() {
@@ -361,6 +413,7 @@ async function apiLogin(login, password) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ login, password }),
   });
+  if (!r.ok) throw new Error('auth_failed');
   return r.json();
 }
 
@@ -413,13 +466,18 @@ els.btnLogin.addEventListener('click', async () => {
     showToast(t('loginMissing'));
     return;
   }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(login)) {
+    shakeForm();
+    showToast(t('emailInvalid'));
+    return;
+  }
 
   els.btnLogin.disabled = true;
   els.btnLogin.innerHTML = `<span class="btn-spinner"></span>${t('loginConnecting')}`;
   els.loginError.textContent = '';
 
-  const data = await apiLogin(login, pass).catch(() => ({ error: t('networkError') }));
-  const loginOk = data && typeof data.session === 'string' && data.session.length > 0;
+  const data = await apiLogin(login, pass).catch(() => null);
+  const loginOk = data && !data.error && typeof data.session === 'string' && data.session.length > 0;
 
   if (loginOk) {
     state.session = data.session;
@@ -449,12 +507,13 @@ $('btn-logout').addEventListener('click', () => {
 
 function enterApp() {
   showScreen('app');
-  state.weekOffset = 0;
-  state.selectedDay = new Date();
-  state.selectedDay.setHours(0, 0, 0, 0);
+  const { day, offset } = computeDefaultDay();
+  state.weekOffset = offset;
+  state.selectedDay = day;
   renderWeek();
   checkIosBanner();
   startProgressTimer();
+  setTimeout(requestNotifyPermission, 3000);
 }
 
 function renderSkeleton() {
@@ -500,7 +559,7 @@ async function renderWeek() {
     tab.className = 'day-tab';
     if (isSameDay(d, today)) tab.classList.add('today');
     if (isSameDay(d, state.selectedDay)) tab.classList.add('active');
-    tab.innerHTML = `<span class="day-tab-name">${t('dayNames')[d.getDay()]}</span><span class="day-tab-num">${d.getDate()}</span>`;
+    tab.innerHTML = `<span class="day-tab-name">${t('dayNames')[d.getDay()]}</span><span class="day-tab-num">${d.getDate()}</span><span class="day-tab-dots"></span>`;
     tab.addEventListener('click', () => { haptic(); selectDay(d); });
     els.dayTabs.appendChild(tab);
   }
@@ -562,6 +621,7 @@ async function renderWeek() {
   }
 
   state.classes = (data.return || []).sort((a, b) => a.start.localeCompare(b.start));
+  updateDayTabDots();
   renderDay(state.selectedDay);
 }
 
@@ -649,7 +709,9 @@ function renderDay(date) {
     }
 
     const dotColor = classTypeColor(cls.form);
+    const formType = getFormType(cls.form);
 
+    card.dataset.form = formType;
     card.innerHTML = `
       <div class="time-col">
         <span class="time-start">${timeS}</span>
@@ -683,6 +745,9 @@ function renderDay(date) {
   els.scheduleList.appendChild(fb);
 
   initIcons();
+
+  const isToday = isSameDay(date, new Date());
+  if (isToday) scheduleClassNotifications(classes);
 
   requestAnimationFrame(() => {
     if (currentCard) currentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -821,3 +886,134 @@ if (!localStorage.getItem('onboarding_done')) {
 } else {
   bootApp();
 }
+
+function requestNotifyPermission() {
+  if (!('Notification' in window) || Notification.permission !== 'default') return;
+  Notification.requestPermission();
+}
+
+function clearNotifyTimers() {
+  notifyTimers.forEach(clearTimeout);
+  notifyTimers = [];
+}
+
+function scheduleClassNotifications(classes) {
+  clearNotifyTimers();
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const now = Date.now();
+  classes.forEach(cls => {
+    const notifyAt = new Date(cls.start).getTime() - NOTIFY_BEFORE_MS;
+    if (notifyAt <= now) return;
+    const timer = setTimeout(() => {
+      new Notification('WU Plan', {
+        body: `${cls.title} • ${cls.room}`,
+        icon: '/icon-192.png',
+      });
+    }, notifyAt - now);
+    notifyTimers.push(timer);
+  });
+}
+
+function getFormType(form) {
+  if (!form) return 'default';
+  const f = form.toLowerCase();
+  if (f.includes('wykład') || f.includes('lektorat')) return 'wyklad';
+  if (f.includes('laboratorium')) return 'laboratorium';
+  if (f.includes('ćwiczenia')) return 'cwiczenia';
+  if (f.includes('seminarium')) return 'seminarium';
+  return 'default';
+}
+
+function updateDayTabDots() {
+  const mon = monday(state.weekOffset);
+  els.dayTabs.querySelectorAll('.day-tab').forEach((tab, i) => {
+    const d = addDays(mon, i);
+    const count = state.classes.filter(c => {
+      const cd = new Date(c.start); cd.setHours(0, 0, 0, 0);
+      return isSameDay(cd, d);
+    }).length;
+    const dots = count === 0 ? 0 : count <= 2 ? 1 : count <= 4 ? 2 : 3;
+    const dotsEl = tab.querySelector('.day-tab-dots');
+    if (dotsEl) dotsEl.innerHTML = Array(dots).fill('<span class="load-dot"></span>').join('');
+  });
+}
+
+function openWeekSummary() {
+  if (state.classes.length === 0) return;
+  const mon = monday(state.weekOffset);
+  const dayNames = t('dayNamesFull');
+  const monthNames = t('monthNames');
+  let html = '';
+  for (let i = 0; i < 6; i++) {
+    const d = addDays(mon, i);
+    const dayClasses = state.classes.filter(c => {
+      const cd = new Date(c.start); cd.setHours(0, 0, 0, 0);
+      return isSameDay(cd, d);
+    });
+    if (dayClasses.length === 0) continue;
+    html += `<div class="week-sum-day">`;
+    html += `<div class="week-sum-header">${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}</div>`;
+    dayClasses.forEach(cls => {
+      html += `<div class="week-sum-row"><span class="week-sum-time">${fmtTime(cls.start)}</span><span class="week-sum-info">${cls.form} — ${cls.title} (${cls.room})</span></div>`;
+    });
+    html += `</div>`;
+  }
+  els.sheetTitle.textContent = els.weekLabel.textContent;
+  els.sheetSubtitle.textContent = '';
+  els.sheetBody.innerHTML = html;
+  els.sheetBackdrop.classList.add('open');
+  els.detailSheet.classList.add('open');
+  initIcons();
+}
+
+els.weekLabel.style.cursor = 'pointer';
+els.weekLabel.addEventListener('click', () => { haptic(); openWeekSummary(); });
+
+let pullStartY = 0;
+let pullActive = false;
+const pullIndicator = document.createElement('div');
+pullIndicator.className = 'pull-indicator';
+pullIndicator.innerHTML = '<span class="btn-spinner"></span>';
+els.scheduleList.parentElement.insertBefore(pullIndicator, els.scheduleList);
+
+els.scheduleList.addEventListener('touchstart', e => {
+  if (els.scheduleList.scrollTop === 0) {
+    pullStartY = e.touches[0].clientY;
+    pullActive = true;
+  }
+}, { passive: true });
+
+els.scheduleList.addEventListener('touchmove', e => {
+  if (!pullActive) return;
+  const dy = e.touches[0].clientY - pullStartY;
+  if (dy > 20) pullIndicator.classList.add('visible');
+}, { passive: true });
+
+els.scheduleList.addEventListener('touchend', e => {
+  if (!pullActive) return;
+  const dy = e.changedTouches[0].clientY - pullStartY;
+  pullIndicator.classList.remove('visible');
+  pullActive = false;
+  if (dy > 70) { haptic(); renderWeek(); }
+}, { passive: true });
+
+let swipeStartX = 0;
+let swipeStartY = 0;
+
+els.scheduleList.addEventListener('touchstart', e => {
+  swipeStartX = e.touches[0].clientX;
+  swipeStartY = e.touches[0].clientY;
+}, { passive: true });
+
+els.scheduleList.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - swipeStartX;
+  const dy = e.changedTouches[0].clientY - swipeStartY;
+  if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
+  const mon = monday(state.weekOffset);
+  const tabs = Array.from(els.dayTabs.querySelectorAll('.day-tab'));
+  const currentIdx = tabs.findIndex((_, i) => isSameDay(addDays(mon, i), state.selectedDay));
+  const nextIdx = dx < 0 ? currentIdx + 1 : currentIdx - 1;
+  if (nextIdx < 0 || nextIdx >= 6) return;
+  haptic();
+  selectDay(addDays(mon, nextIdx));
+}, { passive: true });

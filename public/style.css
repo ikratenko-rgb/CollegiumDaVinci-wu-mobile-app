@@ -1360,3 +1360,85 @@ body {
 .ob-btn-start.visible {
   display: block;
 }
+
+.day-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.day-tab-dots {
+  display: flex;
+  gap: 3px;
+  height: 6px;
+  align-items: center;
+  min-height: 6px;
+}
+
+.load-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.class-card {
+  border-left: 3px solid transparent;
+  transition: border-left-color 0.15s ease;
+}
+
+.class-card[data-form="wyklad"] { border-left-color: #8A2BE2; }
+.class-card[data-form="laboratorium"] { border-left-color: #007AFF; }
+.class-card[data-form="cwiczenia"] { border-left-color: #FF9500; }
+.class-card[data-form="seminarium"] { border-left-color: #FF6B35; }
+.class-card[data-form="default"] { border-left-color: #444; }
+
+.pull-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.2s ease;
+  opacity: 0.6;
+}
+
+.pull-indicator.visible {
+  height: 40px;
+}
+
+.week-sum-day {
+  margin-bottom: 20px;
+}
+
+.week-sum-header {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.week-sum-row {
+  display: flex;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.week-sum-time {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  min-width: 36px;
+  font-variant-numeric: tabular-nums;
+}
+
+.week-sum-info {
+  color: var(--text);
+}
