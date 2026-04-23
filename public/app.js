@@ -708,10 +708,8 @@ function renderDay(date) {
       progressHtml = `<div class="progress-bar" data-start="${cls.start}" data-end="${cls.end}" style="width:${pct.toFixed(1)}%"></div>`;
     }
 
-    const dotColor = classTypeColor(cls.form);
-    const formType = getFormType(cls.form);
-
-    card.dataset.form = formType;
+    const color = getFormColor(cls.form);
+    card.style.setProperty('--form-color', color);
     card.innerHTML = `
       <div class="time-col">
         <span class="time-start">${timeS}</span>
@@ -720,7 +718,6 @@ function renderDay(date) {
       <div class="class-content">
         <div class="class-title">${cls.title}</div>
         <div class="class-meta">
-          <span class="type-dot" style="background:${dotColor}"></span>
           <span class="meta-item">${cls.form}</span>
           <span class="meta-dot"></span>
           <span class="meta-item"><i data-lucide="map-pin" stroke-width="1.2"></i>${cls.room}</span>
@@ -914,27 +911,31 @@ function scheduleClassNotifications(classes) {
   });
 }
 
-function getFormType(form) {
-  if (!form) return 'default';
-  const f = form.toLowerCase();
-  if (f.includes('wykład') || f.includes('lektorat')) return 'wyklad';
-  if (f.includes('laboratorium')) return 'laboratorium';
-  if (f.includes('ćwiczenia')) return 'cwiczenia';
-  if (f.includes('seminarium')) return 'seminarium';
-  return 'default';
+function getFormColor(form) {
+  const map = {
+    'Laboratoria': '#007AFF',
+    'Wykład': '#8A2BE2',
+    'Lektorat': '#30D158',
+    'Ćwiczenia': '#FF9500',
+    'Seminarium': '#FF6B35',
+  };
+  return map[form] || '#555';
 }
 
 function updateDayTabDots() {
   const mon = monday(state.weekOffset);
   els.dayTabs.querySelectorAll('.day-tab').forEach((tab, i) => {
     const d = addDays(mon, i);
-    const count = state.classes.filter(c => {
+    const dayClasses = state.classes.filter(c => {
       const cd = new Date(c.start); cd.setHours(0, 0, 0, 0);
       return isSameDay(cd, d);
-    }).length;
-    const dots = count === 0 ? 0 : count <= 2 ? 1 : count <= 4 ? 2 : 3;
+    });
     const dotsEl = tab.querySelector('.day-tab-dots');
-    if (dotsEl) dotsEl.innerHTML = Array(dots).fill('<span class="load-dot"></span>').join('');
+    if (!dotsEl) return;
+    const shown = dayClasses.slice(0, 3);
+    dotsEl.innerHTML = shown.map(c =>
+      `<span class="load-dot" style="background:${getFormColor(c.form)}"></span>`
+    ).join('');
   });
 }
 
@@ -954,7 +955,11 @@ function openWeekSummary() {
     html += `<div class="week-sum-day">`;
     html += `<div class="week-sum-header">${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}</div>`;
     dayClasses.forEach(cls => {
-      html += `<div class="week-sum-row"><span class="week-sum-time">${fmtTime(cls.start)}</span><span class="week-sum-info">${cls.form} — ${cls.title} (${cls.room})</span></div>`;
+      const color = getFormColor(cls.form);
+      html += `<div class="week-sum-row" style="border-left-color:${color}">`;
+      html += `<span class="week-sum-time">${fmtTime(cls.start)}</span>`;
+      html += `<span class="week-sum-body"><span class="week-sum-title">${cls.title}</span><span class="week-sum-room">${cls.room}</span></span>`;
+      html += `</div>`;
     });
     html += `</div>`;
   }

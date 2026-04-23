@@ -1377,15 +1377,14 @@ body {
 }
 
 .load-dot {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.6;
+  flex-shrink: 0;
 }
 
 .class-card {
-  border-left: 3px solid transparent;
+  border-left: 4px solid var(--form-color, #555);
   transition: border-left-color 0.15s ease;
 }
 
@@ -1393,7 +1392,7 @@ body {
 .class-card[data-form="laboratorium"] { border-left-color: #007AFF; }
 .class-card[data-form="cwiczenia"] { border-left-color: #FF9500; }
 .class-card[data-form="seminarium"] { border-left-color: #FF6B35; }
-.class-card[data-form="default"] { border-left-color: #444; }
+.class-card[data-form="default"] { border-left-color: #555; }
 
 .pull-indicator {
   display: flex;
@@ -1426,19 +1425,41 @@ body {
 
 .week-sum-row {
   display: flex;
-  gap: 10px;
-  padding: 4px 0;
-  font-size: 13px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0 8px 12px;
+  border-left: 3px solid #555;
+  margin-bottom: 6px;
   line-height: 1.4;
 }
 
 .week-sum-time {
   color: var(--text-secondary);
   flex-shrink: 0;
-  min-width: 36px;
+  min-width: 38px;
+  font-size: 13px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
+  padding-top: 1px;
 }
 
-.week-sum-info {
+.week-sum-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.week-sum-title {
+  font-size: 13px;
   color: var(--text);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.week-sum-room {
+  font-size: 11px;
+  color: var(--text-secondary);
 }
