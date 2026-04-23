@@ -30,6 +30,7 @@ export const translations = {
     emailInvalid: 'Nieprawidłowy format email',
     feedbackText: 'Znalazłeś błąd? Napisz do mnie',
     btnToday: 'Dzisiaj',
+    returnHint: '• 2-tap na dzisiaj',
     obSkip: 'Pomiń', obNext: 'Dalej', obStart: 'Zaczynamy!',
     ob: [
       { title: 'Twój plan.', sub: 'Zawsze pod ręką, bez opóźnień i lagów.' },
@@ -69,6 +70,7 @@ export const translations = {
     emailInvalid: 'Некорректный email',
     feedbackText: 'Нашел баг? Напиши мне',
     btnToday: 'Сегодня',
+    returnHint: '• 2-tap перейти на сегодня',
     obSkip: 'Пропустить', obNext: 'Далее', obStart: 'Начнём!',
     ob: [
       { title: 'Твоё расписание.', sub: 'Всегда под рукой, без лагов и пауз.' },
@@ -108,6 +110,7 @@ export const translations = {
     emailInvalid: 'Invalid email format',
     feedbackText: 'Found a bug? Let me know',
     btnToday: 'Today',
+    returnHint: '• 2-tap for today',
     obSkip: 'Skip', obNext: 'Next', obStart: "Let's go!",
     ob: [
       { title: 'Your schedule.', sub: 'Always at hand, fast and smooth.' },

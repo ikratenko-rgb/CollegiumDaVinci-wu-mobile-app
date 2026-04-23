@@ -1,7 +1,16 @@
 import { state, saveSession } from '../state.js';
 import { apiSchedule } from '../api.js';
-import { monday, addDays, fmt, isSameDay, isCurrentWeek, computeDefaultDay, getCachedWeek } from '../utils.js';
+import {
+  monday,
+  addDays,
+  fmt,
+  isSameDay,
+  isCurrentWeek,
+  computeDefaultDay,
+  getCachedWeek
+} from '../utils.js';
 
+let lastTap = 0;
 let tHandler = null;
 let hapticHandler = null;
 let initIconsHandler = null;
@@ -37,8 +46,25 @@ export function configureNavigation({
 export function updateDayHeading(els, date) {
   const dayNames = tHandler('dayNamesFull');
   const monthNames = tHandler('monthNames');
+  const isToday = isSameDay(date, new Date());
   els.dayHeadingMain.textContent = `${dayNames[date.getDay()]}, ${date.getDate()}`;
-  els.dayHeadingSub.textContent = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+  let subText = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+  if (!isToday) {
+    subText += ` <span class="return-hint">${tHandler('returnHint')}</span>`;
+  }
+
+  els.dayHeadingSub.innerHTML = subText;
+}
+
+export function setupDayHeadingActions(els) {
+  els.dayHeadingMain.addEventListener('click', () => {
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      hapticHandler();
+      goToday(els);
+    }
+    lastTap = now;
+  });
 }
 
 export function selectDay(els, d) {

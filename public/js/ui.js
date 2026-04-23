@@ -1,5 +1,6 @@
 import { state } from './state.js';
 import { apiSchedule } from './api.js';
+import { setupDayHeadingActions } from './components/navigation.js';
 import { monday, addDays, fmt } from './utils.js';
 import { t } from './i18n.js';
 import { setupOnboarding as setupOnboardingComponent } from './components/onboarding.js';
@@ -205,4 +206,5 @@ export function initUi() {
   setupSheetGestures(els);
   setupWeekAndListSwipes(els);
   setupWeekSummaryTrigger(els);
+  setupDayHeadingActions(els);
 }
