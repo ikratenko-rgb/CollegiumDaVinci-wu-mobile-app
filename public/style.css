@@ -365,6 +365,7 @@ body {
 .day-heading {
   padding: 0 20px 16px;
   flex-shrink: 0;
+  text-align: center;
 }
 
 .day-heading-main {
@@ -383,12 +384,44 @@ body {
   margin-top: 4px;
 }
 
+
+.day-heading {
+  padding: 0 20px 16px;
+  flex-shrink: 0;
+  text-align: left;
+}
+
+
+
+/* Идеальная шапка (паттерн iOS) */
 .week-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  padding: 0 20px 12px;
+}
+
+.nav-side {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 20px 12px;
-  flex-shrink: 0;
+  z-index: 2; 
+}
+
+
+.nav-center {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  pointer-events: none; 
+}
+
+.week-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .btn-today {
@@ -402,17 +435,30 @@ body {
   border-radius: 20px;
   padding: 5px 10px;
   cursor: pointer;
-  flex-shrink: 0;
   -webkit-appearance: none;
   appearance: none;
   transition: opacity 0.15s ease, transform 0.1s ease;
   font-family: inherit;
+  pointer-events: auto; 
 }
 
 .btn-today:active {
   opacity: 0.6;
   transform: scale(0.95);
 }
+
+.nav-side.left {
+  justify-content: flex-start;
+}
+
+.nav-side.right {
+  justify-content: flex-end;
+}
+
+
+
+
+
 
 .week-arrow {
   width: 32px;
@@ -441,14 +487,19 @@ body {
 }
 
 .week-label {
-  flex: 1;
+  flex: 0 1 auto;
   text-align: center;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
+  padding: 0 76px;
 }
 
 .today-indicator {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 24px;
   width: 5px;
   height: 5px;
   border-radius: 50%;
@@ -540,15 +591,23 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+
+
 .class-card {
   display: flex;
   align-items: flex-start;
   gap: 14px;
   padding: 16px 0 16px 12px;
-  border-bottom: 0.5px solid var(--border);
+  margin-bottom: 5px;
+  border-left: 4px solid var(--form-color, #555);
   cursor: pointer;
   transition: opacity 0.2s ease;
   position: relative;
+}
+
+.class-card:active {
+  transform: scale(0.97);
+  opacity: 0.8;
 }
 
 .class-card:last-child {
@@ -1138,7 +1197,8 @@ body {
   margin-bottom: 44px;
 }
 
-.ob-illustration svg {
+.ob-illustration svg,
+.ob-illustration img {
   width: 100%;
   height: 100%;
 }
@@ -1512,6 +1572,79 @@ body {
   flex-shrink: 0;
 }
 
+.day-heading-main {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.day-heading-main:active {
+  opacity: 0.5;
+}
+
+.nc-widget {
+  margin-top: 32px;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.4s ease;
+}
+
+.nc-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.nc-timer {
+  font-size: 42px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 24px;
+  line-height: 1;
+}
+
+.nc-preview {
+  width: 100%;
+  background: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 14px;
+  border: 0.5px solid var(--border-strong);
+  text-align: left;
+}
+
+.nc-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.3;
+}
+
+.nc-meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nc-meta i {
+  width: 12px;
+  height: 12px;
+}
+
 @media (min-width: 500px) {
   #onboarding-screen {
     display: flex;
@@ -1545,4 +1678,6 @@ body {
     width: auto;
     margin: 0 auto;
   }
+
+  
 }

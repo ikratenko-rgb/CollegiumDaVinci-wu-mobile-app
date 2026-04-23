@@ -30,18 +30,7 @@
 
       <div class="ob-slide active" id="ob-slide-0">
         <div class="ob-illustration">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="ob-pulse">
-            <rect x="10" y="18" width="80" height="72" rx="10" stroke="white" stroke-width="2" />
-            <line x1="10" y1="37" x2="90" y2="37" stroke="white" stroke-width="2" />
-            <line x1="32" y1="8" x2="32" y2="28" stroke="white" stroke-width="2" stroke-linecap="round" />
-            <line x1="68" y1="8" x2="68" y2="28" stroke="white" stroke-width="2" stroke-linecap="round" />
-            <circle cx="33" cy="54" r="3" fill="white" />
-            <circle cx="50" cy="54" r="3" fill="white" />
-            <circle cx="67" cy="54" r="3" fill="white" />
-            <circle cx="33" cy="70" r="3" fill="white" />
-            <circle cx="50" cy="70" r="3" fill="white" />
-            <circle cx="67" cy="70" r="3" fill="rgba(255,255,255,0.25)" />
-          </svg>
+          <img src="/assets/svg/onboarding-calendar.svg" alt="" class="ob-pulse">
         </div>
         <div class="ob-title" id="ob-title-0"></div>
         <div class="ob-subtitle" id="ob-sub-0"></div>
@@ -49,18 +38,7 @@
 
       <div class="ob-slide" id="ob-slide-1">
         <div class="ob-illustration">
-          <svg viewBox="0 0 100 110" fill="none" xmlns="http://www.w3.org/2000/svg" class="ob-float">
-            <rect x="22" y="32" width="56" height="68" rx="8" stroke="white" stroke-width="2" />
-            <line x1="50" y1="6" x2="50" y2="55" stroke="white" stroke-width="2" stroke-linecap="round" />
-            <polyline points="36,20 50,6 64,20" stroke="white" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round" />
-            <line x1="35" y1="58" x2="65" y2="58" stroke="white" stroke-width="1.5" stroke-linecap="round"
-              opacity="0.3" />
-            <line x1="35" y1="70" x2="58" y2="70" stroke="white" stroke-width="1.5" stroke-linecap="round"
-              opacity="0.3" />
-            <line x1="35" y1="82" x2="52" y2="82" stroke="white" stroke-width="1.5" stroke-linecap="round"
-              opacity="0.3" />
-          </svg>
+          <img src="/assets/svg/onboarding-upload.svg" alt="" class="ob-float">
         </div>
         <div class="ob-title" id="ob-title-1"></div>
         <div class="ob-subtitle" id="ob-sub-1"></div>
@@ -68,18 +46,7 @@
 
       <div class="ob-slide" id="ob-slide-2">
         <div class="ob-illustration">
-          <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="18" y="5" width="64" height="120" rx="14" stroke="white" stroke-width="2" />
-            <line x1="18" y1="22" x2="82" y2="22" stroke="white" stroke-width="1" opacity="0.25" />
-            <line x1="18" y1="108" x2="82" y2="108" stroke="white" stroke-width="1" opacity="0.25" />
-            <rect x="35" y="9" width="30" height="8" rx="4" stroke="white" stroke-width="1" opacity="0.5" />
-            <rect x="38" y="114" width="24" height="4" rx="2" fill="white" opacity="0.3" />
-            <g class="ob-drop">
-              <rect x="33" y="52" width="34" height="34" rx="9" stroke="white" stroke-width="2" />
-              <line x1="43" y1="67" x2="57" y2="67" stroke="white" stroke-width="2" stroke-linecap="round" />
-              <line x1="50" y1="60" x2="50" y2="74" stroke="white" stroke-width="2" stroke-linecap="round" />
-            </g>
-          </svg>
+          <img src="/assets/svg/onboarding-mobile-add.svg" alt="">
         </div>
         <div class="ob-title" id="ob-title-2"></div>
         <div class="ob-subtitle" id="ob-sub-2"></div>
@@ -157,13 +124,12 @@
       <div class="day-heading-sub" id="day-heading-sub"></div>
     </section>
 
+    
     <nav class="week-nav">
       <button class="week-arrow" id="btn-prev" aria-label="Previous week">
         <i data-lucide="chevron-left" stroke-width="1.2"></i>
       </button>
       <span class="week-label" id="week-label"></span>
-      <span class="today-indicator" id="today-indicator" style="display:none"></span>
-      <button class="btn-today" id="btn-today" aria-label="Go to today">Today</button>
       <button class="week-arrow" id="btn-next" aria-label="Next week">
         <i data-lucide="chevron-right" stroke-width="1.2"></i>
       </button>
@@ -212,7 +178,7 @@
     </div>
   </footer>
 
-  <script src="/app.js"></script>
+  <script type="module" src="/js/app.js"></script>
 </body>
 
 </html>

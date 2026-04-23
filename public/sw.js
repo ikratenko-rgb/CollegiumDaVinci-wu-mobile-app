@@ -1,5 +1,5 @@
 const CACHE_NAME = 'wu-schedule-v10';
-const STATIC_ASSETS = ['/', '/index.html', '/style.css', '/app.js', '/manifest.json'];
+const STATIC_ASSETS = ['/', '/index.html', '/style.css', '/js/app.js', '/manifest.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
