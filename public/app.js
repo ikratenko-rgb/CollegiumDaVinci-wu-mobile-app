@@ -1,6 +1,9 @@
 const NOTIFY_BEFORE_MS = 15 * 60 * 1000;
 let notifyTimers = [];
 
+const _storedSession = localStorage.getItem('wu_session') || null;
+const _storedLang = localStorage.getItem('wu_lang') || null;
+
 const translations = {
   pl: {
     loginTitle: 'Wirtualna Uczelnia',
@@ -119,14 +122,13 @@ const translations = {
 };
 
 function detectLang() {
-  const saved = localStorage.getItem('wu_lang');
-  if (saved && translations[saved]) return saved;
+  if (_storedLang && translations[_storedLang]) return _storedLang;
   const nav = (navigator.language || '').slice(0, 2).toLowerCase();
   return translations[nav] ? nav : 'ru';
 }
 
 const state = {
-  session: null,
+  session: _storedSession,
   weekOffset: 0,
   selectedDay: null,
   classes: [],
@@ -293,8 +295,14 @@ async function autoLogin(creds) {
   }
 
   try {
-    const data = await apiLogin(creds.login, creds.pass);
-    if (data && data.error) { clearCredentials(); showScreen('login'); return; }
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login: creds.login, password: creds.pass }),
+    });
+    if (r.status === 401) { clearCredentials(); state.session = null; saveSession(); showScreen('login'); return; }
+    if (!r.ok) { showScreen('login'); return; }
+    const data = await r.json();
     if (data?.session) {
       state.session = data.session;
       saveSession();
@@ -308,7 +316,8 @@ async function autoLogin(creds) {
       clearCredentials(); state.session = null; saveSession(); showScreen('login');
     }
   } catch (_) {
-    clearCredentials(); showScreen('login');
+    showToast(t('networkError'));
+    showScreen('login');
   }
 }
 
@@ -348,10 +357,8 @@ function renderWeekUI() {
 
 function bootApp() {
   const creds = loadCredentials();
-  const storedSession = localStorage.getItem('wu_session');
   els.loginScreen.classList.add('hidden');
-  if (storedSession && creds && creds.login && creds.pass) {
-    state.session = storedSession;
+  if (state.session && creds && creds.login && creds.pass) {
     autoLogin(creds);
   } else if (creds && creds.login && creds.pass) {
     autoLogin(creds);
@@ -379,6 +386,7 @@ els.btnTheme.addEventListener('click', () => {
 });
 
 function applyLang(lang) {
+  if (!translations[lang]) return;
   state.lang = lang;
   localStorage.setItem('wu_lang', lang);
   document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -425,6 +433,8 @@ async function apiSchedule(start, end) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ session: state.session, start, end }),
   });
+  if (r.status === 401) return { error: 'Session expired', error_code: 401 };
+  if (!r.ok) throw new Error('server_error');
   return r.json();
 }
 
@@ -440,6 +450,7 @@ async function apiDetails(cls) {
       group_id: cls.group_id,
     }),
   });
+  if (!r.ok) return null;
   return r.json();
 }
 
@@ -549,6 +560,7 @@ $('btn-next').addEventListener('click', () => { haptic(); state.weekOffset++; re
 function goToday() {
   haptic();
   const { day, offset } = computeDefaultDay();
+  if (state.weekOffset === offset && state.selectedDay && isSameDay(state.selectedDay, day)) return;
   state.weekOffset = offset;
   state.selectedDay = day;
   renderWeek();
@@ -609,8 +621,8 @@ async function renderWeek() {
     }
   }
 
-  if (!data || data.error_code !== 0) {
-    if (data?.error === 'Session expired') {
+  if (!data || (data.error_code !== undefined && data.error_code !== 0)) {
+    if (data?.error_code === 401 || data?.error === 'Session expired') {
       state.session = null; saveSession(); showScreen('login'); return;
     }
     const cached = getCachedWeek(cacheKey);
@@ -621,7 +633,7 @@ async function renderWeek() {
       els.offlineBanner.style.display = 'flex';
       initIcons(els.offlineBanner);
     }
-    if (!data || data.error_code !== 0) {
+    if (!data || (data.error_code !== undefined && data.error_code !== 0)) {
       els.scheduleList.innerHTML = `<div class="empty-state">
         <div class="empty-state-icon"><i data-lucide="alert-circle" stroke-width="1"></i></div>
         <div class="empty-state-title">${t('loadError')}</div>
@@ -869,7 +881,6 @@ document.addEventListener('touchend', () => {
   sheetDragY = null;
 });
 
-loadSession();
 applyTheme(state.theme);
 applyLang(state.lang);
 initIcons();
