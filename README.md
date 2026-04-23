@@ -1,8 +1,9 @@
 # WU Plan — расписание без боли
+Мобильное приложение перестало работать 21.04.2026
 
-Официальный сайт wu.cdv.pl работает как будто его писали в 2008-м. Тормозит, требует VPN в некоторых ситуациях, не адаптирован под телефон, и вообще — не PWA. Поэтому я написал своё.
+Официальный сайт wu.cdv.pl работает как будто его писали в 2008-м. Тормозит, не адаптирован под телефон, и вообще — не PWA. Поэтому я написал своё.
 
-Это прогрессивное веб-приложение для студентов Collegium Da Vinci (Wirtualna Uczelnia). Работает как нативное приложение на iPhone и Android, кешируется офлайн, и выглядит нормально.
+Это веб-приложение для студентов Collegium Da Vinci (Wirtualna Uczelnia). Работает как нативное приложение на iPhone и Android, кешируется офлайн, приятный UI. 
 
 ---
 
@@ -46,7 +47,7 @@ npm start
 
 ## Стек
 
-- **Frontend**: Vanilla JS, CSS Custom Properties, Lucide Icons
+- **Frontend**: Native JavaScript (ES6+), Zero-Dependency Architecture.
 - **Backend**: Node.js + Express (прокси к wu.cdv.pl)
 - **PWA**: Service Worker, Web App Manifest, localStorage cache
 
