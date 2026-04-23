@@ -47,7 +47,7 @@ npm start
 
 ## Стек
 
-- **Frontend**: Vanilla JS, CSS Custom Properties, Lucide Icons
+- **Frontend**: Native JavaScript (ES6+), Zero-Dependency Architecture.
 - **Backend**: Node.js + Express (прокси к wu.cdv.pl)
 - **PWA**: Service Worker, Web App Manifest, localStorage cache
 
