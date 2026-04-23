@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wu-schedule-v10';
+const CACHE_NAME = 'wu-schedule-v1.1.2';
 const STATIC_ASSETS = ['/', '/index.html', '/style.css', '/js/app.js', '/manifest.json'];
 
 self.addEventListener('install', e => {

@@ -22,7 +22,7 @@ import {
   queueNotificationPermissionRequest,
 } from './ui.js';
 
-const APP_VERSION = 'v1.0.10';
+const APP_VERSION = 'v1.1.10';
 
 if (state.session) {
   document.getElementById('login-screen').classList.add('hidden');
