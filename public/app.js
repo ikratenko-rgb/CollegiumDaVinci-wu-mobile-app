@@ -212,11 +212,8 @@ function showScreen(name) {
   els.appScreen.classList.toggle('hidden', name !== 'app');
 }
 
-function initIcons(container = document) {
-  if (!window.lucide) return;
-  const nodes = Array.from((container === document ? document : container).querySelectorAll('[data-lucide]'));
-  if (nodes.length === 0) return;
-  lucide.createIcons({ elements: nodes });
+function initIcons(root = document) {
+  window.lucide?.createIcons({ elements: [...root.querySelectorAll('[data-lucide]')] });
 }
 
 let obCurrent = 0;
@@ -232,21 +229,19 @@ function renderObSlide(n) {
   document.querySelectorAll('.ob-slide').forEach((s, i) => s.classList.toggle('active', i === n));
   document.querySelectorAll('.ob-dot').forEach((d, i) => d.classList.toggle('active', i === n));
   const slides = t('ob');
-  for (let i = 0; i < OB_TOTAL; i++) {
-    const tEl = document.getElementById('ob-title-' + i);
-    const sEl = document.getElementById('ob-sub-' + i);
-    if (tEl) tEl.textContent = slides[i].title;
-    if (sEl) sEl.textContent = slides[i].sub;
-  }
+  slides.forEach((slide, i) => {
+    const tEl = $('ob-title-' + i);
+    const sEl = $('ob-sub-' + i);
+    if (tEl) tEl.textContent = slide.title;
+    if (sEl) sEl.textContent = slide.sub;
+  });
   const isLast = n === OB_TOTAL - 1;
-  const btnStart = document.getElementById('ob-btn-start');
-  const btnRow = document.getElementById('ob-btn-row');
+  const btnStart = $('ob-btn-start');
+  const btnRow = $('ob-btn-row');
   if (btnStart) { btnStart.textContent = t('obStart'); btnStart.classList.toggle('visible', isLast); }
   if (btnRow) btnRow.style.display = isLast ? 'none' : 'flex';
-  const btnNext = document.getElementById('ob-btn-next');
-  const btnSkip = document.getElementById('ob-btn-skip');
-  if (btnNext) btnNext.textContent = t('obNext');
-  if (btnSkip) btnSkip.textContent = t('obSkip');
+  $('ob-btn-next').textContent = t('obNext');
+  $('ob-btn-skip').textContent = t('obSkip');
 }
 
 function finishOnboarding() {
@@ -285,7 +280,7 @@ async function autoLogin(creds) {
     renderDay(state.selectedDay);
     try {
       const data = await apiLogin(creds.login, creds.pass);
-      if (data && typeof data.session === 'string' && data.session.length > 0) {
+      if (data?.session) {
         state.session = data.session;
         saveSession();
         backgroundRefresh();
@@ -300,7 +295,7 @@ async function autoLogin(creds) {
   try {
     const data = await apiLogin(creds.login, creds.pass);
     if (data && data.error) { clearCredentials(); showScreen('login'); return; }
-    if (data && typeof data.session === 'string' && data.session.length > 0) {
+    if (data?.session) {
       state.session = data.session;
       saveSession();
       state.selectedDay = day;
@@ -367,13 +362,10 @@ function applyTheme(theme) {
   state.theme = theme;
   localStorage.setItem('wu_theme', theme);
   document.documentElement.setAttribute('data-theme', theme);
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.content = theme === 'light' ? '#FFFFFF' : '#000000';
+  document.querySelector('meta[name="theme-color"]').content = theme === 'light' ? '#FFFFFF' : '#000000';
   const icon = els.btnTheme.querySelector('i');
-  if (icon) {
-    icon.setAttribute('data-lucide', theme === 'light' ? 'moon' : 'sun');
-    initIcons(els.btnTheme);
-  }
+  icon.setAttribute('data-lucide', theme === 'light' ? 'moon' : 'sun');
+  initIcons(els.btnTheme);
 }
 
 els.btnTheme.addEventListener('click', () => {
@@ -522,9 +514,8 @@ function enterApp() {
 }
 
 function renderSkeleton() {
-  let html = '';
-  for (let i = 0; i < 4; i++) {
-    html += `<div class="skeleton-card animate-in" style="animation-delay:${i * 0.05}s">
+  els.scheduleList.innerHTML = Array.from({ length: 4 }, (_, i) => `
+    <div class="skeleton-card animate-in" style="animation-delay:${i * 0.05}s">
       <div class="skeleton-time">
         <div class="skeleton-bone skeleton-time-1"></div>
         <div class="skeleton-bone skeleton-time-2"></div>
@@ -536,9 +527,7 @@ function renderSkeleton() {
           <div class="skeleton-bone skeleton-meta-2"></div>
         </div>
       </div>
-    </div>`;
-  }
-  els.scheduleList.innerHTML = html;
+    </div>`).join('');
 }
 
 $('btn-prev').addEventListener('click', () => { haptic(); state.weekOffset--; renderWeek(); });
@@ -598,22 +587,16 @@ async function renderWeek() {
   }
 
   if (!data || data.error_code !== 0) {
-    if (data && data.error === 'Session expired') {
+    if (data?.error === 'Session expired') {
       state.session = null; saveSession(); showScreen('login'); return;
     }
-    const fallback = !fromCache && localStorage.getItem(cacheKey);
-    if (fallback) {
-      try {
-        const parsed = JSON.parse(fallback);
-        data = parsed.data;
-        fromCache = true;
-        const timeStr = new Date(parsed.ts).toLocaleString(t('cacheKey'), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-        if (els.offlineBanner) {
-          els.offlineText.textContent = `${t('offlineMode')} ${timeStr}`;
-          els.offlineBanner.style.display = 'flex';
-          initIcons(els.offlineBanner);
-        }
-      } catch (_) { data = null; }
+    const cached = getCachedWeek(cacheKey);
+    if (cached) {
+      data = cached.data;
+      const timeStr = new Date(cached.ts).toLocaleString(t('cacheKey'), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      els.offlineText.textContent = `${t('offlineMode')} ${timeStr}`;
+      els.offlineBanner.style.display = 'flex';
+      initIcons(els.offlineBanner);
     }
     if (!data || data.error_code !== 0) {
       els.scheduleList.innerHTML = `<div class="empty-state">
@@ -648,22 +631,16 @@ function selectDay(d) {
   renderDay(d);
 }
 
-const CLASS_TYPE_COLORS = {
-  'Wykład': '#9b5de5',
-  'Lektorat': '#9b5de5',
-  'Laboratorium': '#00b4d8',
-  'Ćwiczenia': '#f77f00',
-  'Seminarium': '#f77f00',
-  'Projekt': '#f77f00',
+const FORM_COLORS = {
+  laborat: '#0A84FF',
+  lektorat: '#30D158',
+  wykład: '#BF5AF2',
+  wyklad: '#BF5AF2',
+  ćwiczenia: '#FF9F0A',
+  cwiczenia: '#FF9F0A',
+  seminarium: '#FF6B35',
+  projekt: '#FF6B35',
 };
-
-function classTypeColor(form) {
-  if (!form) return '#555555';
-  for (const [key, color] of Object.entries(CLASS_TYPE_COLORS)) {
-    if (form.toLowerCase().includes(key.toLowerCase())) return color;
-  }
-  return '#555555';
-}
 
 function renderDay(date) {
   const classes = state.classes.filter(c => {
@@ -885,37 +862,25 @@ function requestNotifyPermission() {
   Notification.requestPermission();
 }
 
-function clearNotifyTimers() {
+function scheduleClassNotifications(classes) {
   notifyTimers.forEach(clearTimeout);
   notifyTimers = [];
-}
-
-function scheduleClassNotifications(classes) {
-  clearNotifyTimers();
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   const now = Date.now();
   classes.forEach(cls => {
     const notifyAt = new Date(cls.start).getTime() - NOTIFY_BEFORE_MS;
     if (notifyAt <= now) return;
-    const timer = setTimeout(() => {
-      new Notification('WU Plan', {
-        body: `${cls.title} • ${cls.room}`,
-        icon: '/icon-192.png',
-      });
-    }, notifyAt - now);
-    notifyTimers.push(timer);
+    notifyTimers.push(setTimeout(() => {
+      new Notification('WU Plan', { body: `${cls.title} • ${cls.room}`, icon: '/icon-192.png' });
+    }, notifyAt - now));
   });
 }
 
 function getFormColor(form) {
   if (!form) return '#6B7280';
   const f = form.toLowerCase();
-  if (f.includes('laborat')) return '#0A84FF';
-  if (f.includes('wykład') || f.includes('wyklad')) return '#BF5AF2';
-  if (f.includes('lektorat')) return '#30D158';
-  if (f.includes('ćwiczenia') || f.includes('cwiczenia')) return '#FF9F0A';
-  if (f.includes('seminarium') || f.includes('projekt')) return '#FF6B35';
-  return '#6B7280';
+  const match = Object.entries(FORM_COLORS).find(([k]) => f.includes(k));
+  return match ? match[1] : '#6B7280';
 }
 
 function updateDayTabDots() {
@@ -936,29 +901,30 @@ function updateDayTabDots() {
 }
 
 function openWeekSummary() {
-  if (state.classes.length === 0) return;
+  if (!state.classes.length) return;
   const mon = monday(state.weekOffset);
   const dayNames = t('dayNamesFull');
   const monthNames = t('monthNames');
-  let html = '';
-  for (let i = 0; i < 6; i++) {
+  const html = Array.from({ length: 6 }, (_, i) => {
     const d = addDays(mon, i);
     const dayClasses = state.classes.filter(c => {
       const cd = new Date(c.start); cd.setHours(0, 0, 0, 0);
       return isSameDay(cd, d);
     });
-    if (dayClasses.length === 0) continue;
-    html += `<div class="week-sum-day">`;
-    html += `<div class="week-sum-header">${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}</div>`;
-    dayClasses.forEach(cls => {
-      const color = getFormColor(cls.form);
-      html += `<div class="week-sum-row" style="border-left-color:${color}">`;
-      html += `<span class="week-sum-time">${fmtTime(cls.start)}</span>`;
-      html += `<span class="week-sum-body"><span class="week-sum-title">${cls.title}</span><span class="week-sum-form">${cls.form || ''}</span></span>`;
-      html += `</div>`;
-    });
-    html += `</div>`;
-  }
+    if (!dayClasses.length) return '';
+    const rows = dayClasses.map(cls => `
+      <div class="week-sum-row" style="border-left-color:${getFormColor(cls.form)}">
+        <span class="week-sum-time">${fmtTime(cls.start)}</span>
+        <span class="week-sum-body">
+          <span class="week-sum-title">${cls.title}</span>
+          <span class="week-sum-form">${cls.form || ''}</span>
+        </span>
+      </div>`).join('');
+    return `<div class="week-sum-day">
+      <div class="week-sum-header">${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}</div>
+      ${rows}
+    </div>`;
+  }).join('');
   els.sheetTitle.textContent = els.weekLabel.textContent;
   els.sheetSubtitle.textContent = '';
   els.sheetBody.innerHTML = html;
@@ -970,51 +936,43 @@ function openWeekSummary() {
 els.weekLabel.style.cursor = 'pointer';
 els.weekLabel.addEventListener('click', () => { haptic(); openWeekSummary(); });
 
-let pullStartY = 0;
-let pullActive = false;
 const pullIndicator = document.createElement('div');
 pullIndicator.className = 'pull-indicator';
 pullIndicator.innerHTML = '<span class="btn-spinner"></span>';
 els.scheduleList.parentElement.insertBefore(pullIndicator, els.scheduleList);
 
+let touch = {};
+
 els.scheduleList.addEventListener('touchstart', e => {
+  touch.x = e.touches[0].clientX;
+  touch.y = e.touches[0].clientY;
   if (els.scheduleList.scrollTop === 0) {
-    pullStartY = e.touches[0].clientY;
-    pullActive = true;
+    touch.pullY = e.touches[0].clientY;
+    touch.pulling = true;
   }
 }, { passive: true });
 
 els.scheduleList.addEventListener('touchmove', e => {
-  if (!pullActive) return;
-  const dy = e.touches[0].clientY - pullStartY;
-  if (dy > 20) pullIndicator.classList.add('visible');
+  if (!touch.pulling) return;
+  if (e.touches[0].clientY - touch.pullY > 20) pullIndicator.classList.add('visible');
 }, { passive: true });
 
 els.scheduleList.addEventListener('touchend', e => {
-  if (!pullActive) return;
-  const dy = e.changedTouches[0].clientY - pullStartY;
   pullIndicator.classList.remove('visible');
-  pullActive = false;
-  if (dy > 70) { haptic(); renderWeek(); }
-}, { passive: true });
+  if (touch.pulling) {
+    const dy = e.changedTouches[0].clientY - touch.pullY;
+    touch.pulling = false;
+    if (dy > 70) { haptic(); renderWeek(); }
+  }
 
-let swipeStartX = 0;
-let swipeStartY = 0;
-
-els.scheduleList.addEventListener('touchstart', e => {
-  swipeStartX = e.touches[0].clientX;
-  swipeStartY = e.touches[0].clientY;
-}, { passive: true });
-
-els.scheduleList.addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - swipeStartX;
-  const dy = e.changedTouches[0].clientY - swipeStartY;
+  const dx = e.changedTouches[0].clientX - touch.x;
+  const dy = e.changedTouches[0].clientY - touch.y;
   if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
   const mon = monday(state.weekOffset);
-  const tabs = Array.from(els.dayTabs.querySelectorAll('.day-tab'));
-  const currentIdx = tabs.findIndex((_, i) => isSameDay(addDays(mon, i), state.selectedDay));
-  const nextIdx = dx < 0 ? currentIdx + 1 : currentIdx - 1;
-  if (nextIdx < 0 || nextIdx >= 6) return;
+  const tabs = [...els.dayTabs.querySelectorAll('.day-tab')];
+  const cur = tabs.findIndex((_, i) => isSameDay(addDays(mon, i), state.selectedDay));
+  const next = dx < 0 ? cur + 1 : cur - 1;
+  if (next < 0 || next >= 6) return;
   haptic();
-  selectDay(addDays(mon, nextIdx));
+  selectDay(addDays(mon, next));
 }, { passive: true });
