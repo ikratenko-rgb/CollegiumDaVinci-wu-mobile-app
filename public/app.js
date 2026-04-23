@@ -754,7 +754,7 @@ function renderDay(date) {
         <div class="class-meta">
           <span class="meta-item">${cls.form}</span>
           <span class="meta-dot"></span>
-          <span class="meta-item"><i data-lucide="map-pin" stroke-width="1.2"></i>${cls.room}</span>
+          <span class="meta-item"><i data-lucide="users" stroke-width="1.2"></i>${cls.room}</span>
         </div>
       </div>
       <div class="card-chevron"><i data-lucide="chevron-right" stroke-width="1.2"></i></div>
@@ -867,6 +867,8 @@ function detailRow(icon, label, value) {
 }
 
 function closeSheet() {
+  els.detailSheet.style.transform = '';
+  els.detailSheet.style.transition = '';
   els.sheetBackdrop.classList.remove('open');
   els.detailSheet.classList.remove('open');
 }
@@ -874,35 +876,35 @@ function closeSheet() {
 els.sheetBackdrop.addEventListener('click', closeSheet);
 
 let sheetDragY = null;
-let sheetDragStartY = null;
+let sheetDragging = false;
 
 els.detailSheet.addEventListener('touchstart', e => {
-  sheetDragStartY = e.touches[0].clientY;
   sheetDragY = e.touches[0].clientY;
-  els.detailSheet.style.transition = 'none';
+  sheetDragging = false;
 }, { passive: true });
 
-document.addEventListener('touchmove', e => {
+els.detailSheet.addEventListener('touchmove', e => {
   if (sheetDragY === null) return;
   const dy = e.touches[0].clientY - sheetDragY;
-  const totalDy = e.touches[0].clientY - sheetDragStartY;
-  if (totalDy > 0) {
-    els.detailSheet.style.transform = `translateY(${totalDy}px)`;
+  if (dy > 0 && els.detailSheet.scrollTop === 0) {
+    sheetDragging = true;
+    e.preventDefault();
+    els.detailSheet.style.transition = 'none';
+    els.detailSheet.style.transform = `translateY(${dy}px)`;
   }
-}, { passive: true });
+}, { passive: false });
 
-document.addEventListener('touchend', () => {
+els.detailSheet.addEventListener('touchend', e => {
   if (sheetDragY === null) return;
+  const dy = e.changedTouches[0].clientY - sheetDragY;
   els.detailSheet.style.transition = '';
-  const current = parseFloat(els.detailSheet.style.transform.replace(/[^\d.-]/g, '')) || 0;
-  if (current > 100) {
+  if (sheetDragging && dy > 80) {
     closeSheet();
   } else {
     els.detailSheet.style.transform = '';
-    els.detailSheet.classList.add('open');
   }
   sheetDragY = null;
-  sheetDragStartY = null;
+  sheetDragging = false;
 });
 
 applyTheme(state.theme);
@@ -957,9 +959,18 @@ function updateDayTabDots() {
     });
     const dotsEl = tab.querySelector('.day-tab-dots');
     if (!dotsEl) return;
-    const shown = dayClasses.slice(0, 3);
-    dotsEl.innerHTML = shown.map(c =>
-      `<span class="load-dot" style="background:${getFormColor(c.form)}"></span>`
+    const n = dayClasses.length;
+    if (n === 0) { dotsEl.innerHTML = ''; return; }
+    const uniqueColors = [...new Set(dayClasses.map(c => getFormColor(c.form)))];
+    let dots;
+    if (uniqueColors.length >= 2) {
+      const a = uniqueColors[0], b = uniqueColors[1];
+      dots = n <= 2 ? [a, b] : [a, a, b, b];
+    } else {
+      dots = Array(Math.min(n, 4)).fill(uniqueColors[0]);
+    }
+    dotsEl.innerHTML = dots.map(color =>
+      `<span class="load-dot" style="background:${color}"></span>`
     ).join('');
   });
 }

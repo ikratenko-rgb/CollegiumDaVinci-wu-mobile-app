@@ -1451,38 +1451,31 @@ body {
 }
 
 .app-footer {
-  position: fixed;
+  position: absolute;
+  right: 16px;
   bottom: 0;
   left: 0;
   right: 0;
-  padding-top: 10px;
-  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px));
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   background: rgba(0, 0, 0, 0.72);
-  border-top: 0.5px solid rgba(255, 255, 255, 0.08);
   z-index: 50;
 }
 
 [data-theme="light"] .app-footer {
   background: rgba(255, 255, 255, 0.72);
-  border-top: 0.5px solid rgba(0, 0, 0, 0.08);
 }
 
 .app-version {
-  position: absolute;
-  right: 15px;
-  bottom: 12px;
-  font-size: 15px;
+  font-size: 11px;
   color: var(--text-tertiary);
   pointer-events: none;
-  font-weight: 500;
-  opacity: 50;
-  transition: opacity 0.3s ease;
-  letter-spacing: 0.5px;
+  opacity: 0.5;
+  letter-spacing: 0.3px;
 }
 
 @media (max-width: 340px) {
