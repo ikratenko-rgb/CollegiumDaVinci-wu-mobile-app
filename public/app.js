@@ -1,10 +1,14 @@
+const APP_VERSION = 'v1.0.10';
+const NOTIFY_BEFORE_MS = 15 * 60 * 1000;
+let notifyTimers = [];
+
 const savedSession = localStorage.getItem('wu_session');
 if (savedSession) document.getElementById('login-screen').classList.add('hidden');
 
 const savedLang = localStorage.getItem('wu_lang');
 
-const NOTIFY_BEFORE_MS = 15 * 60 * 1000;
-let notifyTimers = [];
+const versionEl = document.getElementById('app-version');
+if (versionEl) versionEl.textContent = APP_VERSION;
 
 const translations = {
   pl: {
@@ -474,7 +478,7 @@ if ('serviceWorker' in navigator) {
         if (next.state === 'activated') window.location.reload();
       });
     });
-  }).catch(() => {});
+  }).catch(() => { });
 }
 
 els.btnLogin.addEventListener('click', async () => {
@@ -554,6 +558,23 @@ function renderSkeleton() {
 
 $('btn-prev').addEventListener('click', () => { haptic(); state.weekOffset--; renderWeek(); });
 $('btn-next').addEventListener('click', () => { haptic(); state.weekOffset++; renderWeek(); });
+
+let weekNavTouchX = null;
+const weekNavEl = document.querySelector('.week-nav');
+if (weekNavEl) {
+  weekNavEl.addEventListener('touchstart', e => {
+    weekNavTouchX = e.touches[0].clientX;
+  }, { passive: true });
+  weekNavEl.addEventListener('touchend', e => {
+    if (weekNavTouchX === null) return;
+    const dx = e.changedTouches[0].clientX - weekNavTouchX;
+    weekNavTouchX = null;
+    if (Math.abs(dx) < 50) return;
+    haptic();
+    if (dx < 0) { state.weekOffset++; } else { state.weekOffset--; }
+    renderWeek();
+  }, { passive: true });
+}
 
 function goToday() {
   haptic();
@@ -853,7 +874,10 @@ function closeSheet() {
 els.sheetBackdrop.addEventListener('click', closeSheet);
 
 let sheetDragY = null;
-els.sheetHandle.addEventListener('touchstart', e => {
+let sheetDragStartY = null;
+
+els.detailSheet.addEventListener('touchstart', e => {
+  sheetDragStartY = e.touches[0].clientY;
   sheetDragY = e.touches[0].clientY;
   els.detailSheet.style.transition = 'none';
 }, { passive: true });
@@ -861,8 +885,9 @@ els.sheetHandle.addEventListener('touchstart', e => {
 document.addEventListener('touchmove', e => {
   if (sheetDragY === null) return;
   const dy = e.touches[0].clientY - sheetDragY;
-  if (dy > 0) {
-    els.detailSheet.style.transform = `translateY(${dy}px)`;
+  const totalDy = e.touches[0].clientY - sheetDragStartY;
+  if (totalDy > 0) {
+    els.detailSheet.style.transform = `translateY(${totalDy}px)`;
   }
 }, { passive: true });
 
@@ -877,6 +902,7 @@ document.addEventListener('touchend', () => {
     els.detailSheet.classList.add('open');
   }
   sheetDragY = null;
+  sheetDragStartY = null;
 });
 
 applyTheme(state.theme);

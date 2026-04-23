@@ -1472,6 +1472,25 @@ body {
   border-top: 0.5px solid rgba(0, 0, 0, 0.08);
 }
 
+.app-version {
+  position: absolute;
+  right: 15px;
+  bottom: 12px;
+  font-size: 15px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+  font-weight: 500;
+  opacity: 50;
+  transition: opacity 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 340px) {
+  .app-version {
+    display: none;
+  }
+}
+
 .app-footer a {
   display: flex;
   align-items: center;
