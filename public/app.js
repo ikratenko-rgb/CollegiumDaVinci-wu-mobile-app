@@ -41,7 +41,7 @@ const translations = {
     monthNames: ['stycznia', 'lutego', 'marca', 'kwietnia', 'maja', 'czerwca', 'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia'],
   },
   ru: {
-    loginTitle: 'Виртуальный Университет',
+    loginTitle: 'Wirtualna Uczelnia',
     loginSubtitle: 'Войдите чтобы увидеть расписание',
     loginLabel: 'Логин (e-mail)',
     passLabel: 'Пароль',
@@ -79,7 +79,7 @@ const translations = {
     monthNames: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'],
   },
   en: {
-    loginTitle: 'Virtual University',
+    loginTitle: 'Wirtualna Uczelnia',
     loginSubtitle: 'Log in to view your schedule',
     loginLabel: 'Login (e-mail)',
     passLabel: 'Password',
