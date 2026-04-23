@@ -3,82 +3,81 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
 
-  <!-- SEO -->
   <title>WU Plan — Collegium Da Vinci</title>
-  <meta name="description" content="Minimalistyczna aplikacja do przeglądania planu zajęć Collegium Da Vinci (Wirtualna Uczelnia)">
+  <meta name="description"
+    content="Minimalistyczna aplikacja do przeglądania planu zajęć Collegium Da Vinci (Wirtualna Uczelnia)">
 
-  <!-- PWA / iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="WU Plan">
-  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=2">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=2">
   <link rel="manifest" href="/manifest.json">
 
-  <!-- Styles -->
   <link rel="stylesheet" href="/style.css">
-
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 
 <body>
 
-  <!-- ═══════════════ ONBOARDING SCREEN ═══════════════ -->
   <div class="screen hidden" id="onboarding-screen">
     <div class="ob-slides">
 
-      <!-- Slide 1: Calendar -->
       <div class="ob-slide active" id="ob-slide-0">
         <div class="ob-illustration">
           <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="ob-pulse">
-            <rect x="10" y="18" width="80" height="72" rx="10" stroke="white" stroke-width="2"/>
-            <line x1="10" y1="37" x2="90" y2="37" stroke="white" stroke-width="2"/>
-            <line x1="32" y1="8" x2="32" y2="28" stroke="white" stroke-width="2" stroke-linecap="round"/>
-            <line x1="68" y1="8" x2="68" y2="28" stroke="white" stroke-width="2" stroke-linecap="round"/>
-            <circle cx="33" cy="54" r="3" fill="white"/>
-            <circle cx="50" cy="54" r="3" fill="white"/>
-            <circle cx="67" cy="54" r="3" fill="white"/>
-            <circle cx="33" cy="70" r="3" fill="white"/>
-            <circle cx="50" cy="70" r="3" fill="white"/>
-            <circle cx="67" cy="70" r="3" fill="rgba(255,255,255,0.25)"/>
+            <rect x="10" y="18" width="80" height="72" rx="10" stroke="white" stroke-width="2" />
+            <line x1="10" y1="37" x2="90" y2="37" stroke="white" stroke-width="2" />
+            <line x1="32" y1="8" x2="32" y2="28" stroke="white" stroke-width="2" stroke-linecap="round" />
+            <line x1="68" y1="8" x2="68" y2="28" stroke="white" stroke-width="2" stroke-linecap="round" />
+            <circle cx="33" cy="54" r="3" fill="white" />
+            <circle cx="50" cy="54" r="3" fill="white" />
+            <circle cx="67" cy="54" r="3" fill="white" />
+            <circle cx="33" cy="70" r="3" fill="white" />
+            <circle cx="50" cy="70" r="3" fill="white" />
+            <circle cx="67" cy="70" r="3" fill="rgba(255,255,255,0.25)" />
           </svg>
         </div>
         <div class="ob-title" id="ob-title-0"></div>
         <div class="ob-subtitle" id="ob-sub-0"></div>
       </div>
 
-      <!-- Slide 2: Share icon -->
       <div class="ob-slide" id="ob-slide-1">
         <div class="ob-illustration">
           <svg viewBox="0 0 100 110" fill="none" xmlns="http://www.w3.org/2000/svg" class="ob-float">
-            <rect x="22" y="32" width="56" height="68" rx="8" stroke="white" stroke-width="2"/>
-            <line x1="50" y1="6" x2="50" y2="55" stroke="white" stroke-width="2" stroke-linecap="round"/>
-            <polyline points="36,20 50,6 64,20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <line x1="35" y1="58" x2="65" y2="58" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
-            <line x1="35" y1="70" x2="58" y2="70" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
-            <line x1="35" y1="82" x2="52" y2="82" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+            <rect x="22" y="32" width="56" height="68" rx="8" stroke="white" stroke-width="2" />
+            <line x1="50" y1="6" x2="50" y2="55" stroke="white" stroke-width="2" stroke-linecap="round" />
+            <polyline points="36,20 50,6 64,20" stroke="white" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <line x1="35" y1="58" x2="65" y2="58" stroke="white" stroke-width="1.5" stroke-linecap="round"
+              opacity="0.3" />
+            <line x1="35" y1="70" x2="58" y2="70" stroke="white" stroke-width="1.5" stroke-linecap="round"
+              opacity="0.3" />
+            <line x1="35" y1="82" x2="52" y2="82" stroke="white" stroke-width="1.5" stroke-linecap="round"
+              opacity="0.3" />
           </svg>
         </div>
         <div class="ob-title" id="ob-title-1"></div>
         <div class="ob-subtitle" id="ob-sub-1"></div>
       </div>
 
-      <!-- Slide 3: iPhone + landing icon -->
       <div class="ob-slide" id="ob-slide-2">
         <div class="ob-illustration">
           <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="18" y="5" width="64" height="120" rx="14" stroke="white" stroke-width="2"/>
-            <line x1="18" y1="22" x2="82" y2="22" stroke="white" stroke-width="1" opacity="0.25"/>
-            <line x1="18" y1="108" x2="82" y2="108" stroke="white" stroke-width="1" opacity="0.25"/>
-            <rect x="35" y="9" width="30" height="8" rx="4" stroke="white" stroke-width="1" opacity="0.5"/>
-            <rect x="38" y="114" width="24" height="4" rx="2" fill="white" opacity="0.3"/>
+            <rect x="18" y="5" width="64" height="120" rx="14" stroke="white" stroke-width="2" />
+            <line x1="18" y1="22" x2="82" y2="22" stroke="white" stroke-width="1" opacity="0.25" />
+            <line x1="18" y1="108" x2="82" y2="108" stroke="white" stroke-width="1" opacity="0.25" />
+            <rect x="35" y="9" width="30" height="8" rx="4" stroke="white" stroke-width="1" opacity="0.5" />
+            <rect x="38" y="114" width="24" height="4" rx="2" fill="white" opacity="0.3" />
             <g class="ob-drop">
-              <rect x="33" y="52" width="34" height="34" rx="9" stroke="white" stroke-width="2"/>
-              <line x1="43" y1="67" x2="57" y2="67" stroke="white" stroke-width="2" stroke-linecap="round"/>
-              <line x1="50" y1="60" x2="50" y2="74" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <rect x="33" y="52" width="34" height="34" rx="9" stroke="white" stroke-width="2" />
+              <line x1="43" y1="67" x2="57" y2="67" stroke="white" stroke-width="2" stroke-linecap="round" />
+              <line x1="50" y1="60" x2="50" y2="74" stroke="white" stroke-width="2" stroke-linecap="round" />
             </g>
           </svg>
         </div>
@@ -86,9 +85,8 @@
         <div class="ob-subtitle" id="ob-sub-2"></div>
       </div>
 
-    </div><!-- .ob-slides -->
+    </div>
 
-    <!-- Controls -->
     <div class="ob-controls">
       <button class="ob-btn-start" id="ob-btn-start"></button>
       <div class="ob-btn-row" id="ob-btn-row">
@@ -103,8 +101,6 @@
     </div>
   </div>
 
-  <!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
-
   <div class="screen" id="login-screen">
     <div class="login-brand"><span>WU</span> · CDV</div>
     <h1 class="login-title" data-i18n="loginTitle">Wirtualna Uczelnia</h1>
@@ -112,7 +108,8 @@
 
     <div class="field">
       <label class="field-label" for="inp-login" data-i18n="loginLabel">Login (e-mail)</label>
-      <input class="field-input" type="email" id="inp-login" autocomplete="email" inputmode="email" placeholder="imie@edu.cdv.pl">
+      <input class="field-input" type="email" id="inp-login" autocomplete="email" inputmode="email"
+        placeholder="imie@edu.cdv.pl">
     </div>
     <div class="field">
       <label class="field-label" for="inp-pass" data-i18n="passLabel">Hasło</label>
@@ -123,10 +120,8 @@
     <div class="login-error" id="login-error" aria-live="polite"></div>
   </div>
 
-  <!-- ═══════════════ APP SCREEN ═══════════════ -->
   <div class="screen hidden" id="app-screen">
 
-    <!-- Header -->
     <header class="app-header">
       <div class="header-row">
         <div class="header-brand"><span>WU</span> · <span data-i18n="headerSchedule">Plan zajęć</span></div>
@@ -141,9 +136,7 @@
               <button class="lang-option" data-lang="en">English</button>
             </div>
           </div>
-          <a class="icon-btn feedback-icon" href="https://t.me/krtlnk" target="_blank" rel="noopener" aria-label="Feedback">
-            <i data-lucide="send" stroke-width="1.2"></i>
-          </a>
+
           <button class="icon-btn" id="btn-theme" aria-label="Toggle theme">
             <i data-lucide="sun" stroke-width="1.2"></i>
           </button>
@@ -154,19 +147,16 @@
       </div>
     </header>
 
-    <!-- Offline banner -->
     <div class="offline-banner" id="offline-banner" style="display:none">
       <i data-lucide="wifi-off" stroke-width="1.2"></i>
       <span id="offline-text"></span>
     </div>
 
-    <!-- Day heading -->
     <section class="day-heading" id="day-heading">
       <div class="day-heading-main" id="day-heading-main"></div>
       <div class="day-heading-sub" id="day-heading-sub"></div>
     </section>
 
-    <!-- Week navigation -->
     <nav class="week-nav">
       <button class="week-arrow" id="btn-prev" aria-label="Previous week">
         <i data-lucide="chevron-left" stroke-width="1.2"></i>
@@ -178,17 +168,13 @@
       </button>
     </nav>
 
-    <!-- Day tabs -->
     <nav class="day-tabs" id="day-tabs"></nav>
 
-    <!-- Separator -->
     <div class="separator"></div>
 
-    <!-- Schedule list -->
     <main class="schedule-list" id="schedule-list"></main>
   </div>
 
-  <!-- ═══════════════ BOTTOM SHEET ═══════════════ -->
   <div class="sheet-backdrop" id="sheet-backdrop"></div>
   <div class="sheet" id="detail-sheet">
     <div class="sheet-handle" id="sheet-handle"></div>
@@ -199,7 +185,6 @@
     <div id="sheet-body"></div>
   </div>
 
-  <!-- ═══════════════ iOS BANNER ═══════════════ -->
   <div class="ios-banner" id="ios-banner" style="display:none">
     <span class="ios-banner-icon">
       <i data-lucide="share" stroke-width="1.2"></i>
@@ -210,8 +195,17 @@
     </button>
   </div>
 
-  <!-- Toast notification -->
   <div class="toast" id="toast"></div>
+
+  <footer class="app-footer">
+    <a href="https://t.me/krtlnk" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+      <span data-i18n="feedbackText">Нашёл баг? Напиши мне</span>
+    </a>
+  </footer>
 
   <script src="/app.js"></script>
 </body>

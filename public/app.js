@@ -212,8 +212,11 @@ function showScreen(name) {
   els.appScreen.classList.toggle('hidden', name !== 'app');
 }
 
-function initIcons() {
-  if (window.lucide) lucide.createIcons();
+function initIcons(container = document) {
+  if (!window.lucide) return;
+  const nodes = Array.from((container === document ? document : container).querySelectorAll('[data-lucide]'));
+  if (nodes.length === 0) return;
+  lucide.createIcons({ elements: nodes });
 }
 
 let obCurrent = 0;
@@ -266,49 +269,51 @@ function loadCredentials() {
 function clearCredentials() { localStorage.removeItem('wu_creds'); }
 
 async function autoLogin(creds) {
-  let data;
+  const { day, offset } = computeDefaultDay();
+  const cacheKey = 'wu_schedule_' + fmt(monday(offset));
+  const cached = getCachedWeek(cacheKey);
+
+  if (cached) {
+    state.selectedDay = day;
+    state.weekOffset = offset;
+    state.classes = (cached.data.return || []).sort((a, b) => a.start.localeCompare(b.start));
+    showScreen('app');
+    startProgressTimer();
+    checkIosBanner();
+    renderWeekUI();
+    updateDayTabDots();
+    renderDay(state.selectedDay);
+    try {
+      const data = await apiLogin(creds.login, creds.pass);
+      if (data && typeof data.session === 'string' && data.session.length > 0) {
+        state.session = data.session;
+        saveSession();
+        backgroundRefresh();
+      }
+    } catch (_) {
+      const ts = new Date(cached.ts).toLocaleString(t('cacheKey'), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      if (els.offlineBanner) { els.offlineText.textContent = t('offlineMode') + ' ' + ts; els.offlineBanner.style.display = 'flex'; initIcons(); }
+    }
+    return;
+  }
+
   try {
-    data = await apiLogin(creds.login, creds.pass);
-  } catch (_) {
-    const { day, offset } = computeDefaultDay();
-    const cached = getCachedWeek('wu_schedule_' + fmt(monday(offset)));
-    if (cached) {
+    const data = await apiLogin(creds.login, creds.pass);
+    if (data && data.error) { clearCredentials(); showScreen('login'); return; }
+    if (data && typeof data.session === 'string' && data.session.length > 0) {
+      state.session = data.session;
+      saveSession();
       state.selectedDay = day;
       state.weekOffset = offset;
       showScreen('app');
       startProgressTimer();
       checkIosBanner();
-      state.classes = (cached.data.return || []).sort((a, b) => a.start.localeCompare(b.start));
-      renderWeekUI();
-      renderDay(state.selectedDay);
-      const ts = new Date(cached.ts).toLocaleString(t('cacheKey'), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-      if (els.offlineBanner) { els.offlineText.textContent = t('offlineMode') + ' ' + ts; els.offlineBanner.style.display = 'flex'; initIcons(); }
+      renderWeek();
     } else {
-      clearCredentials();
-      showScreen('login');
+      clearCredentials(); state.session = null; saveSession(); showScreen('login');
     }
-    return;
-  }
-  if (data && data.error) {
-    clearCredentials();
-    showScreen('login');
-    return;
-  }
-  if (data && typeof data.session === 'string' && data.session.length > 0) {
-    state.session = data.session;
-    saveSession();
-    const { day, offset } = computeDefaultDay();
-    state.selectedDay = day;
-    state.weekOffset = offset;
-    showScreen('app');
-    startProgressTimer();
-    checkIosBanner();
-    renderWeek();
-  } else {
-    clearCredentials();
-    state.session = null;
-    saveSession();
-    showScreen('login');
+  } catch (_) {
+    clearCredentials(); showScreen('login');
   }
 }
 
@@ -340,7 +345,7 @@ function renderWeekUI() {
     tab.className = 'day-tab';
     if (isSameDay(d, today)) tab.classList.add('today');
     if (isSameDay(d, state.selectedDay)) tab.classList.add('active');
-    tab.innerHTML = '<span class="day-tab-name">' + t('dayNames')[d.getDay()] + '</span><span class="day-tab-num">' + d.getDate() + '</span>';
+    tab.innerHTML = `<span class="day-tab-name">${t('dayNames')[d.getDay()]}</span><span class="day-tab-num">${d.getDate()}</span><span class="day-tab-dots"></span>`;
     tab.addEventListener('click', () => { haptic(); selectDay(d); });
     els.dayTabs.appendChild(tab);
   }
@@ -367,7 +372,7 @@ function applyTheme(theme) {
   const icon = els.btnTheme.querySelector('i');
   if (icon) {
     icon.setAttribute('data-lucide', theme === 'light' ? 'moon' : 'sun');
-    initIcons();
+    initIcons(els.btnTheme);
   }
 }
 
@@ -586,7 +591,7 @@ async function renderWeek() {
         if (els.offlineBanner) {
           els.offlineText.textContent = `${t('offlineMode')} ${timeStr}`;
           els.offlineBanner.style.display = 'flex';
-          initIcons();
+          initIcons(els.offlineBanner);
         }
       } catch (_) { data = null; }
     }
@@ -606,7 +611,7 @@ async function renderWeek() {
         if (els.offlineBanner) {
           els.offlineText.textContent = `${t('offlineMode')} ${timeStr}`;
           els.offlineBanner.style.display = 'flex';
-          initIcons();
+          initIcons(els.offlineBanner);
         }
       } catch (_) { data = null; }
     }
@@ -615,7 +620,7 @@ async function renderWeek() {
         <div class="empty-state-icon"><i data-lucide="alert-circle" stroke-width="1"></i></div>
         <div class="empty-state-title">${t('loadError')}</div>
       </div>`;
-      initIcons();
+      initIcons(els.scheduleList);
       return;
     }
   }
@@ -671,11 +676,9 @@ function renderDay(date) {
       <div class="empty-state-icon"><i data-lucide="coffee" stroke-width="1"></i></div>
       <div class="empty-state-title">${t('emptyTitle')}</div>
       <div class="empty-state-subtitle">${t('emptySubtitle')}</div>
-      <a class="feedback-link" href="https://t.me/krtlnk" target="_blank" rel="noopener">
-        <i data-lucide="send" stroke-width="1.2"></i>${t('feedbackText')}
-      </a>
+
     </div>`;
-    initIcons();
+    initIcons(els.scheduleList);
     return;
   }
 
@@ -732,16 +735,9 @@ function renderDay(date) {
     if (isCurrent) currentCard = card;
   });
 
-  const fb = document.createElement('a');
-  fb.className = 'feedback-link animate-in';
-  fb.href = 'https://t.me/krtlnk';
-  fb.target = '_blank';
-  fb.rel = 'noopener';
-  fb.style.animationDelay = `${classes.length * 0.04 + 0.1}s`;
-  fb.innerHTML = `<i data-lucide="send" stroke-width="1.2"></i>${t('feedbackText')}`;
-  els.scheduleList.appendChild(fb);
 
-  initIcons();
+
+  initIcons(els.scheduleList);
 
   const isToday = isSameDay(date, new Date());
   if (isToday) scheduleClassNotifications(classes);
@@ -826,7 +822,7 @@ async function openDetail(cls) {
     ${cls.hangoutLink ? detailRow('link', t('detailLink'), `<a href="${cls.hangoutLink}" class="selectable">${cls.hangoutLink}</a>`) : ''}
   `;
 
-  initIcons();
+  initIcons(els.detailSheet);
 }
 
 function detailRow(icon, label, value) {
@@ -912,14 +908,14 @@ function scheduleClassNotifications(classes) {
 }
 
 function getFormColor(form) {
-  const map = {
-    'Laboratoria': '#007AFF',
-    'Wykład': '#8A2BE2',
-    'Lektorat': '#30D158',
-    'Ćwiczenia': '#FF9500',
-    'Seminarium': '#FF6B35',
-  };
-  return map[form] || '#555';
+  if (!form) return '#6B7280';
+  const f = form.toLowerCase();
+  if (f.includes('laborat')) return '#0A84FF';
+  if (f.includes('wykład') || f.includes('wyklad')) return '#BF5AF2';
+  if (f.includes('lektorat')) return '#30D158';
+  if (f.includes('ćwiczenia') || f.includes('cwiczenia')) return '#FF9F0A';
+  if (f.includes('seminarium') || f.includes('projekt')) return '#FF6B35';
+  return '#6B7280';
 }
 
 function updateDayTabDots() {
@@ -958,7 +954,7 @@ function openWeekSummary() {
       const color = getFormColor(cls.form);
       html += `<div class="week-sum-row" style="border-left-color:${color}">`;
       html += `<span class="week-sum-time">${fmtTime(cls.start)}</span>`;
-      html += `<span class="week-sum-body"><span class="week-sum-title">${cls.title}</span><span class="week-sum-room">${cls.room}</span></span>`;
+      html += `<span class="week-sum-body"><span class="week-sum-title">${cls.title}</span><span class="week-sum-form">${cls.form || ''}</span></span>`;
       html += `</div>`;
     });
     html += `</div>`;
@@ -968,7 +964,7 @@ function openWeekSummary() {
   els.sheetBody.innerHTML = html;
   els.sheetBackdrop.classList.add('open');
   els.detailSheet.classList.add('open');
-  initIcons();
+  initIcons(els.detailSheet);
 }
 
 els.weekLabel.style.cursor = 'pointer';
