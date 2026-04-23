@@ -49,7 +49,7 @@ app.post('/api/login', async (req, res) => {
       if (match && match[1] === 'loginLanguage') langCookie = match[2];
     }
 
-    if (!sessionCookie) {
+    if (!sessionCookie || response.status !== 302) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
